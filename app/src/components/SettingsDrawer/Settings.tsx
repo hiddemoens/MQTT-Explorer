@@ -1,28 +1,16 @@
 import * as React from 'react'
-import ChevronRight from '@mui/icons-material/ChevronRight'
 import CloudOff from '@mui/icons-material/CloudOff'
 import Logout from '@mui/icons-material/Logout'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 import { shell } from 'electron'
-import { Theme } from '@mui/material/styles'
+import { darken, Theme } from '@mui/material/styles'
 import { withStyles } from '@mui/styles'
-import {
-  Button,
-  Divider,
-  Drawer,
-  IconButton,
-  Input,
-  InputLabel,
-  MenuItem,
-  Select,
-  SelectChangeEvent,
-  Typography,
-  Tooltip,
-} from '@mui/material'
+import { Button, Drawer, Typography, Tooltip } from '@mui/material'
 import TimeLocale from './TimeLocale'
+import SettingsDropdown from './SettingsDropdown'
 import { AppState } from '../../reducers'
-import { globalActions, settingsActions, connectionActions } from '../../actions'
+import { settingsActions, connectionActions } from '../../actions'
 import { TopicOrder } from '../../reducers/Settings'
 import { isBrowserMode } from '../../utils/browserMode'
 import { useAuth } from '../../contexts/AuthContext'
@@ -57,23 +45,20 @@ export const autoExpandLimitSet = [
   },
 ]
 
+const autoExpandLimits = autoExpandLimitSet.map(option => option.limit)
+const topicOrders = [TopicOrder.none, TopicOrder.abc, TopicOrder.messages, TopicOrder.topics]
+const topicOrderLabels = {
+  [TopicOrder.none]: 'Default',
+  [TopicOrder.abc]: 'A–Z',
+  [TopicOrder.messages]: '#messages',
+  [TopicOrder.topics]: '#topics',
+}
+
 const styles = (theme: Theme) => ({
-  drawer: {
-    backgroundColor: theme.palette.background.default,
-    flexShrink: 0,
-    userSelect: 'none' as const,
-  },
-  paper: {
-    width: '300px',
-  },
   title: {
     color: theme.palette.text.primary,
-    paddingTop: theme.spacing(1),
-    ...theme.mixins.toolbar,
-  },
-  input: {
-    minWidth: '150px',
-    margin: `auto ${theme.spacing(1)} auto ${theme.spacing(2)}px`,
+    padding: theme.spacing(2, 2, 1),
+    fontWeight: 600,
   },
   author: {
     margin: 'auto 8px 8px auto',
@@ -98,7 +83,6 @@ const styles = (theme: Theme) => ({
 interface Props {
   actions: {
     settings: typeof settingsActions
-    global: typeof globalActions
     connection: typeof connectionActions
   }
   autoExpandLimit: number
@@ -164,81 +148,66 @@ class Settings extends React.PureComponent<Props, {}> {
   }
 
   private renderAutoExpand() {
-    const { classes, autoExpandLimit } = this.props
+    const { autoExpandLimit, actions } = this.props
 
-    const limits = autoExpandLimitSet.map(limit => (
-      <MenuItem key={limit.limit} value={limit.limit}>
-        {limit.limit < 10000 && limit.limit > 0 ? `≤ ${limit.limit} topics` : limit.name}
-      </MenuItem>
-    ))
     return (
-      <div style={{ padding: '8px', display: 'flex' }}>
-        <InputLabel htmlFor="auto-expand" style={{ flex: '1', marginTop: '8px' }}>
-          Auto Expand
-        </InputLabel>
-        <Select
-          value={autoExpandLimit}
-          onChange={this.onChangeAutoExpand}
-          input={<Input name="auto-expand" id="auto-expand-label-placeholder" />}
-          name="auto-expand"
-          className={classes.input}
-          style={{ flex: '1' }}
-        >
-          {limits}
-        </Select>
-      </div>
+      <SettingsDropdown
+        id="auto-expand"
+        label="Auto Expand"
+        options={autoExpandLimits}
+        value={autoExpandLimit}
+        getOptionLabel={limit => {
+          if (limit > 0 && limit < 10000) {
+            return `≤ ${limit} topics`
+          }
+          return autoExpandLimitSet.find(option => option.limit === limit)?.name ?? String(limit)
+        }}
+        onChange={(_, limit) => actions.settings.setAutoExpandLimit(limit)}
+      />
     )
-  }
-
-  private onChangeAutoExpand = (e: SelectChangeEvent<number>) => {
-    this.props.actions.settings.setAutoExpandLimit(parseInt(String(e.target.value), 10))
   }
 
   private renderNodeOrder() {
-    const { classes, topicOrder } = this.props
+    const { topicOrder, actions } = this.props
 
     return (
-      <div style={{ padding: '8px', display: 'flex' }}>
-        <InputLabel htmlFor="auto-expand" style={{ flex: '1', marginTop: '8px' }}>
-          Topic Order
-        </InputLabel>
-        <Select
-          value={topicOrder}
-          onChange={this.onChangeSorting}
-          input={<Input name="node-order" id="node-order-label-placeholder" />}
-          displayEmpty
-          name="node-order"
-          className={classes.input}
-          style={{ flex: '1' }}
-        >
-          <MenuItem value={TopicOrder.none}>
-            <em>default</em>
-          </MenuItem>
-          <MenuItem value={TopicOrder.abc}>a-z</MenuItem>
-          <MenuItem value={TopicOrder.messages}>{TopicOrder.messages}</MenuItem>
-          <MenuItem value={TopicOrder.topics}>{TopicOrder.topics}</MenuItem>
-        </Select>
-      </div>
+      <SettingsDropdown
+        id="node-order"
+        label="Topic Order"
+        options={topicOrders}
+        value={topicOrder}
+        getOptionLabel={order => topicOrderLabels[order]}
+        onChange={(_, order) => actions.settings.setTopicOrder(order)}
+      />
     )
-  }
-
-  private onChangeSorting = (e: SelectChangeEvent<TopicOrder>) => {
-    this.props.actions.settings.setTopicOrder(e.target.value as TopicOrder)
   }
 
   public render() {
     const { classes, actions, visible } = this.props
     return (
-      <Drawer anchor="left" className={classes.drawer} open={visible} variant="persistent">
-        <div className={classes.paper} tabIndex={0} role="button">
-          <Typography className={classes.title} variant="h6" color="inherit">
-            <IconButton onClick={actions.global.toggleSettingsVisibility}>
-              <ChevronRight />
-            </IconButton>
-            Settings
-          </Typography>
-          <Divider style={{ userSelect: 'none' }} />
-        </div>
+      <Drawer
+        anchor="left"
+        open={visible}
+        variant="persistent"
+        slotProps={{
+          paper: {
+            id: 'settings-drawer',
+            role: 'complementary',
+            'aria-labelledby': 'settings-heading',
+            sx: theme => ({
+              position: 'absolute',
+              backgroundColor:
+                theme.palette.mode === 'dark' ? '#3C4047' : darken(theme.palette.background.default, 0.035),
+              width: 'var(--settings-drawer-width)',
+              userSelect: 'none',
+              '@media (prefers-reduced-motion: reduce)': { transition: 'none !important' },
+            }),
+          },
+        }}
+      >
+        <Typography id="settings-heading" component="h2" variant="subtitle1" className={classes.title}>
+          Settings
+        </Typography>
         <MobileActionButtons classes={classes} actions={actions} />
         <div>
           {this.renderAutoExpand()}
@@ -325,7 +294,6 @@ const mapStateToProps = (state: AppState) => ({
 const mapDispatchToProps = (dispatch: any) => ({
   actions: {
     settings: bindActionCreators(settingsActions, dispatch),
-    global: bindActionCreators(globalActions, dispatch),
     connection: bindActionCreators(connectionActions, dispatch),
   },
 })

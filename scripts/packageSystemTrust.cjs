@@ -9,7 +9,7 @@ async function main() {
   if (!['mac', 'linux', 'win'].includes(platform))
     throw new Error('Usage: node scripts/packageSystemTrust.cjs mac|linux|win [version]')
   const root = path.resolve(__dirname, '..')
-  const version = process.argv[3] || '0.4.0-fork.5'
+  const version = process.argv[3] || '0.5.0'
   const staging = path.join(root, 'build', 'distribution', platform)
   const output = path.join(root, 'build', 'downloads')
   fs.rmSync(staging, { recursive: true, force: true })
@@ -29,7 +29,7 @@ async function main() {
   delete metadata.build
   fs.writeFileSync(path.join(staging, 'package.json'), JSON.stringify(metadata, null, 2))
   fs.copyFileSync(path.join(root, 'package-lock.json'), path.join(staging, 'package-lock.json'))
-  // These manually distributed prereleases should not enable automatic updates.
+  // These manually distributed releases should not enable automatic updates.
   fs.writeFileSync(path.join(staging, 'buildOptions.json'), JSON.stringify({ platform, package: 'portable' }))
   execFileSync('npm', ['ci', '--omit=dev', '--ignore-scripts', '--legacy-peer-deps', '--no-audit', '--no-fund'], {
     cwd: staging,

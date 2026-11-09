@@ -1,8 +1,7 @@
 import * as React from 'react'
 import CloudOff from '@mui/icons-material/CloudOff'
 import Logout from '@mui/icons-material/Logout'
-import Menu from '@mui/icons-material/Menu'
-import { AppBar, Button, IconButton, Toolbar, Typography } from '@mui/material'
+import { AppBar, Button, IconButton, SvgIcon, Toolbar, Typography } from '@mui/material'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 import { Theme } from '@mui/material/styles'
@@ -39,6 +38,13 @@ const styles = (theme: Theme) => ({
     marginLeft: -12,
     marginRight: 20,
   },
+  menuLine: {
+    transition: theme.transitions.create('transform', {
+      duration: theme.transitions.duration.enteringScreen,
+      easing: theme.transitions.easing.easeOut,
+    }),
+    '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
+  },
   disconnect: {
     margin: 0,
     // Hide on mobile (<=768px)
@@ -70,7 +76,7 @@ interface Props {
     connection: typeof connectionActions
     global: typeof globalActions
   }
-  topicFilter?: string
+  settingsVisible: boolean
 }
 
 class TitleBar extends React.PureComponent<Props, {}> {
@@ -96,7 +102,7 @@ class TitleBar extends React.PureComponent<Props, {}> {
   }
 
   public render() {
-    const { actions, classes } = this.props
+    const { actions, classes, settingsVisible } = this.props
 
     return (
       <AppBar position="static">
@@ -104,10 +110,32 @@ class TitleBar extends React.PureComponent<Props, {}> {
           <IconButton
             className={classes.menuButton}
             color="inherit"
-            aria-label="Menu"
+            aria-label={settingsVisible ? 'Close settings' : 'Open settings'}
+            aria-expanded={settingsVisible}
+            aria-controls="settings-drawer"
             onClick={actions.global.toggleSettingsVisibility}
           >
-            <Menu />
+            <SvgIcon>
+              <g fill="none" stroke="currentColor" strokeWidth="2">
+                <path
+                  d="M4 6h16"
+                  className={classes.menuLine}
+                  style={{
+                    transformOrigin: '4px 6px',
+                    transform: settingsVisible ? 'translateY(6px) rotate(-45deg) scaleX(.57)' : undefined,
+                  }}
+                />
+                <path d="M4 12h16" />
+                <path
+                  d="M4 18h16"
+                  className={classes.menuLine}
+                  style={{
+                    transformOrigin: '4px 18px',
+                    transform: settingsVisible ? 'translateY(-6px) rotate(45deg) scaleX(.57)' : undefined,
+                  }}
+                />
+              </g>
+            </SvgIcon>
           </IconButton>
           <Typography className={classes.title} variant="h6" color="inherit">
             MQTT Explorer
@@ -148,7 +176,7 @@ function LogoutButton({ classes, onLogout }: { classes: any; onLogout: () => voi
 }
 
 const mapStateToProps = (state: AppState) => ({
-  topicFilter: state.settings.get('topicFilter'),
+  settingsVisible: state.globalState.get('settingsVisible'),
 })
 
 const mapDispatchToProps = (dispatch: any) => ({

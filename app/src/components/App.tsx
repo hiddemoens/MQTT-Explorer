@@ -22,7 +22,6 @@ const ContentView = React.lazy(() => import('./Layout/ContentView'))
 interface Props {
   connectionId: string
   classes: any
-  settingsVisible: boolean
   forceDesktopLayout: boolean
   error?: string
   notification?: string
@@ -64,8 +63,7 @@ class App extends React.PureComponent<Props, {}> {
   }
 
   public render() {
-    const { settingsVisible } = this.props
-    const { content, contentShift, centerContent, paneDefaults, heightProperty } = this.props.classes
+    const { content, layout, centerContent, paneDefaults, heightProperty } = this.props.classes
 
     if (this.props.launching) {
       return null
@@ -83,15 +81,11 @@ class App extends React.PureComponent<Props, {}> {
             onClose={() => this.props.actions.toggleAboutDialogVisibility()}
           />
           {this.renderNotification()}
-          <React.Suspense fallback={<div />}>
-            <Settings {...anyProps} />
-          </React.Suspense>
-          <div className={centerContent}>
-            <div className={`${settingsVisible ? contentShift : content}`}>
-              <TitleBar />
-            </div>
-            <div className={settingsVisible ? contentShift : content}>
+          <div className={layout}>
+            <TitleBar />
+            <div className={content}>
               <React.Suspense fallback={<div />}>
+                <Settings {...anyProps} />
                 <ContentView
                   heightProperty={heightProperty}
                   connectionId={this.props.connectionId}
@@ -108,46 +102,34 @@ class App extends React.PureComponent<Props, {}> {
   }
 }
 
-const styles = (theme: Theme) => {
-  const drawerWidth = 300
-  const contentBaseStyle = {
-    width: '100vw',
+const styles = (theme: Theme) => ({
+  heightProperty: {
+    height: '100%',
+  },
+  paneDefaults: {
     backgroundColor: theme.palette.background.default,
-  }
-
-  return {
-    heightProperty: {
-      height: '100%', // 'calc(100vh - 64px) !important',
-    },
-    paneDefaults: {
-      backgroundColor: theme.palette.background.default,
-      color: theme.palette.text.primary,
-      display: 'block' as const,
-      height: 'calc(100vh - 64px)',
-    },
-    centerContent: {
-      width: '100vw',
-      overflow: 'hidden' as const,
-    },
-    content: {
-      ...contentBaseStyle,
-      transition: theme.transitions.create('transform', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen,
-      }),
-      transform: 'translateX(0px)',
-    },
-    contentShift: {
-      ...contentBaseStyle,
-      backgroundColor: theme.palette.background.default,
-      transition: theme.transitions.create('transform', {
-        easing: theme.transitions.easing.easeOut,
-        duration: theme.transitions.duration.enteringScreen,
-      }),
-      transform: `translateX(${drawerWidth}px)`,
-    },
-  }
-}
+    color: theme.palette.text.primary,
+    display: 'block' as const,
+    height: '100%',
+  },
+  centerContent: {
+    width: '100vw',
+    overflow: 'hidden' as const,
+  },
+  layout: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    height: '100vh',
+  },
+  content: {
+    '--settings-drawer-width': 'min(300px, 100%)',
+    position: 'relative' as const,
+    flex: 1,
+    minHeight: 0,
+    overflow: 'hidden' as const,
+    backgroundColor: theme.palette.background.default,
+  },
+})
 
 const mapDispatchToProps = (dispatch: any) => ({
   actions: bindActionCreators(globalActions, dispatch),
@@ -155,7 +137,6 @@ const mapDispatchToProps = (dispatch: any) => ({
 })
 
 const mapStateToProps = (state: AppState) => ({
-  settingsVisible: state.globalState.get('settingsVisible'),
   forceDesktopLayout: state.settings.get('forceDesktopLayout'),
   connectionId: state.connection.connectionId,
   error: state.globalState.get('error'),

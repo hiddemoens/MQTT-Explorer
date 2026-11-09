@@ -1,5 +1,6 @@
 import * as React from 'react'
 import ReactSplitPaneImport from 'react-split-pane'
+import { Box } from '@mui/material'
 import { connect } from 'react-redux'
 import { List } from 'immutable'
 import { useResizeDetector } from 'react-resize-detector'
@@ -19,6 +20,7 @@ interface Props {
   connectionId?: string
   chartPanelItems: List<ChartParameters>
   forceDesktopLayout: boolean
+  settingsVisible: boolean
 }
 
 function ContentView(props: Props) {
@@ -108,12 +110,31 @@ function ContentView(props: Props) {
     return () => clearTimeout(timer)
   }, [isMobile, mobileTab])
 
+  const topics = (
+    <Box
+      sx={theme => ({
+        height: '100%',
+        overflow: 'hidden',
+        paddingInlineStart: props.settingsVisible ? 'var(--settings-drawer-width)' : 0,
+        transition: theme.transitions.create('padding-inline-start', {
+          easing: props.settingsVisible ? theme.transitions.easing.easeOut : theme.transitions.easing.sharp,
+          duration: props.settingsVisible
+            ? theme.transitions.duration.enteringScreen
+            : theme.transitions.duration.leavingScreen,
+        }),
+        '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
+      })}
+    >
+      <Tree isMobile={isMobile} />
+    </Box>
+  )
+
   // Mobile view with tab switcher
   if (isMobile) {
     const mobileContainerStyle: React.CSSProperties = {
       display: 'flex',
       flexDirection: 'column',
-      height: 'calc(100vh - 64px)', // Full viewport minus titlebar
+      height: '100%',
       width: '100%',
     }
 
@@ -160,7 +181,7 @@ function ContentView(props: Props) {
             aria-labelledby="mobile-tab-0"
             style={{ ...treeContainerStyle, display: mobileTab === 0 ? 'block' : 'none' }}
           >
-            <Tree isMobile />
+            {topics}
           </div>
           {/* Details and Publish - keep mounted, toggle visibility */}
           <div
@@ -210,13 +231,13 @@ function ContentView(props: Props) {
               minSize={0}
               size={height}
               allowResize
-              style={{ height: 'calc(100vh - 64px)' }}
+              style={{ height: '100%' }}
               pane1Style={{ maxHeight: '100%' }}
               pane2Style={{ borderTop: '1px solid #999', display: 'flex' }}
               onChange={(size: number) => setHeight(size)}
               onDragFinished={closeDrawerCompletelyIfItSitsOnTheEdge}
             >
-              <Tree />
+              {topics}
               {/** Passing height constraints via flex options down */}
               <div
                 ref={heightRef}
@@ -252,6 +273,7 @@ function ContentView(props: Props) {
 }
 
 const mapStateToProps = (state: AppState) => ({
+  settingsVisible: state.globalState.get('settingsVisible'),
   forceDesktopLayout: state.settings.get('forceDesktopLayout'),
   chartPanelItems: state.charts.get('charts'),
 })

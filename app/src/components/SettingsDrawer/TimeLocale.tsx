@@ -1,11 +1,12 @@
 import * as React from 'react'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
-import { Autocomplete, Box, TextField, Typography } from '@mui/material'
+import { Box, Typography } from '@mui/material'
 import moment from 'moment'
 import { settingsActions } from '../../actions'
 import { AppState } from '../../reducers'
 import DateFormatter from '../helper/DateFormatter'
+import SettingsDropdown from './SettingsDropdown'
 
 function importAll(r: any) {
   r.keys().forEach(r)
@@ -53,49 +54,39 @@ function TimeLocaleSettings({ timeLocale, actions }: Props) {
   const options = existing ? formats : [selected, ...formats]
 
   return (
-    <Box sx={{ px: 1, py: 1.5 }}>
-      <Autocomplete
-        id="time-locale"
-        size="small"
-        fullWidth
-        disableClearable
-        options={options}
-        value={selected}
-        isOptionEqualToValue={(option, value) => option.locale === value.locale}
-        getOptionLabel={option => option.label}
-        getOptionKey={option => option.locale}
-        onChange={(_, option) => actions.settings.setTimeLocale(option.locale)}
-        renderInput={params => (
-          <TextField
-            {...params}
-            label="Format"
-            helperText={
-              <>
-                <DateFormatter date={exampleDate} /> · {selected.numberExample}
-              </>
-            }
-          />
-        )}
-        renderOption={(props, option) => {
-          const { key, ...liProps } = props
-          return (
-            <li key={key} {...liProps}>
-              <Box component="span" sx={{ display: 'grid', gridTemplateColumns: '5.5rem minmax(0, 1fr)', gap: 1 }}>
-                <Typography component="span" variant="body2" sx={{ fontWeight: 'bold', overflowWrap: 'anywhere' }}>
-                  {option.label}
+    <SettingsDropdown
+      id="time-locale"
+      label="Format"
+      options={options}
+      value={selected}
+      isOptionEqualToValue={(option, value) => option.locale === value.locale}
+      getOptionLabel={option => option.label}
+      getOptionKey={option => option.locale}
+      onChange={(_, option) => actions.settings.setTimeLocale(option.locale)}
+      helperText={
+        <>
+          <DateFormatter date={exampleDate} /> · {selected.numberExample}
+        </>
+      }
+      renderOption={(props, option) => {
+        const { key, ...liProps } = props
+        return (
+          <li key={key} {...liProps}>
+            <Box component="span" sx={{ display: 'grid', gridTemplateColumns: '5.5rem minmax(0, 1fr)', gap: 1 }}>
+              <Typography component="span" variant="body2" sx={{ fontWeight: 'bold', overflowWrap: 'anywhere' }}>
+                {option.label}
+              </Typography>
+              <Typography component="span" variant="body2" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                <DateFormatter date={exampleDate} overrideLocale={option.locale} />
+                <Typography component="span" variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                  {option.numberExample}
                 </Typography>
-                <Typography component="span" variant="body2" sx={{ fontVariantNumeric: 'tabular-nums' }}>
-                  <DateFormatter date={exampleDate} overrideLocale={option.locale} />
-                  <Typography component="span" variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                    {option.numberExample}
-                  </Typography>
-                </Typography>
-              </Box>
-            </li>
-          )
-        }}
-      />
-    </Box>
+              </Typography>
+            </Box>
+          </li>
+        )
+      }}
+    />
   )
 }
 

@@ -15,16 +15,16 @@ Fork of [thomasnordquist/MQTT-Explorer](https://github.com/thomasnordquist/MQTT-
 ## Downloads
 
 Download desktop builds from [this fork's GitHub Releases](https://github.com/hiddemoens/MQTT-Explorer/releases).
-Current preview: [v0.4.0-fork.5](https://github.com/hiddemoens/MQTT-Explorer/releases/tag/v0.4.0-fork.5).
+Current release: [v0.5.0](https://github.com/hiddemoens/MQTT-Explorer/releases/tag/v0.5.0).
 
 | Platform | Downloads |
 | --- | --- |
-| macOS 12+ — Apple Silicon (M1 and newer) | [DMG](https://github.com/hiddemoens/MQTT-Explorer/releases/download/v0.4.0-fork.5/MQTT-Explorer-0.4.0-fork.5-mac-arm64.dmg) · [ZIP](https://github.com/hiddemoens/MQTT-Explorer/releases/download/v0.4.0-fork.5/MQTT-Explorer-0.4.0-fork.5-mac-arm64.zip) |
-| macOS 12+ — Intel | [DMG](https://github.com/hiddemoens/MQTT-Explorer/releases/download/v0.4.0-fork.5/MQTT-Explorer-0.4.0-fork.5-mac-x64.dmg) · [ZIP](https://github.com/hiddemoens/MQTT-Explorer/releases/download/v0.4.0-fork.5/MQTT-Explorer-0.4.0-fork.5-mac-x64.zip) |
-| Windows — x64 | [Installer](https://github.com/hiddemoens/MQTT-Explorer/releases/download/v0.4.0-fork.5/MQTT-Explorer-0.4.0-fork.5-windows-x64-setup.exe) · [Portable](https://github.com/hiddemoens/MQTT-Explorer/releases/download/v0.4.0-fork.5/MQTT-Explorer-0.4.0-fork.5-windows-x64-portable.exe) |
-| Linux — x64 | [AppImage](https://github.com/hiddemoens/MQTT-Explorer/releases/download/v0.4.0-fork.5/MQTT-Explorer-0.4.0-fork.5-linux-x86_64.AppImage) · [tar.gz](https://github.com/hiddemoens/MQTT-Explorer/releases/download/v0.4.0-fork.5/MQTT-Explorer-0.4.0-fork.5-linux-x64.tar.gz) |
+| macOS 12+ — Apple Silicon (M1 and newer) | [DMG](https://github.com/hiddemoens/MQTT-Explorer/releases/download/v0.5.0/MQTT-Explorer-0.5.0-mac-arm64.dmg) · [ZIP](https://github.com/hiddemoens/MQTT-Explorer/releases/download/v0.5.0/MQTT-Explorer-0.5.0-mac-arm64.zip) |
+| macOS 12+ — Intel | [DMG](https://github.com/hiddemoens/MQTT-Explorer/releases/download/v0.5.0/MQTT-Explorer-0.5.0-mac-x64.dmg) · [ZIP](https://github.com/hiddemoens/MQTT-Explorer/releases/download/v0.5.0/MQTT-Explorer-0.5.0-mac-x64.zip) |
+| Windows — x64 | [Installer](https://github.com/hiddemoens/MQTT-Explorer/releases/download/v0.5.0/MQTT-Explorer-0.5.0-windows-x64-setup.exe) · [Portable](https://github.com/hiddemoens/MQTT-Explorer/releases/download/v0.5.0/MQTT-Explorer-0.5.0-windows-x64-portable.exe) |
+| Linux — x64 | [AppImage](https://github.com/hiddemoens/MQTT-Explorer/releases/download/v0.5.0/MQTT-Explorer-0.5.0-linux-x86_64.AppImage) · [tar.gz](https://github.com/hiddemoens/MQTT-Explorer/releases/download/v0.5.0/MQTT-Explorer-0.5.0-linux-x64.tar.gz) |
 
-[SHA-256 checksums](https://github.com/hiddemoens/MQTT-Explorer/releases/download/v0.4.0-fork.5/SHA256SUMS.txt) accompany downloads. See release notes for verification status.
+[SHA-256 checksums](https://github.com/hiddemoens/MQTT-Explorer/releases/download/v0.5.0/SHA256SUMS.txt) accompany downloads. See release notes for verification status.
 
 ### Installation and updates
 
@@ -32,7 +32,7 @@ Current preview: [v0.4.0-fork.5](https://github.com/hiddemoens/MQTT-Explorer/rel
 - **Windows:** run installer, or use portable executable. Builds are unsigned and may show a SmartScreen warning.
 - **Linux:** make AppImage executable (`chmod +x <downloaded-file>.AppImage`) and run it, or extract tar.gz and run `mqtt-explorer`. Keep distribution `ca-certificates` package installed and updated.
 
-These prerelease packages use manual updates: download a newer build from this fork's Releases page.
+These packages use manual updates: download a newer build from this fork's Releases page.
 Restart app after operating system certificate updates. Keep **Validate certificate** enabled.
 
 ## Quick Start with GitHub Codespaces
@@ -342,10 +342,10 @@ Use Node 24 and Yarn 1.22. Build from this fork's source checkout:
 ```sh
 yarn install --frozen-lockfile
 NODE_ENV=production yarn build
-node scripts/packageSystemTrust.cjs mac 0.4.0-fork.5
-node scripts/packageSystemTrust.cjs linux 0.4.0-fork.5
-node scripts/packageSystemTrust.cjs win 0.4.0-fork.5
+node scripts/packageSystemTrust.cjs mac 0.5.0
+node scripts/packageSystemTrust.cjs linux 0.5.0
+node scripts/packageSystemTrust.cjs win 0.5.0
 ```
 
 Packages are written to `build/downloads/`. macOS packaging requires macOS and Xcode Command Line Tools; macOS builds include both Apple Silicon and Intel variants. Linux and Windows targets currently use x64.
-Packaging stages runtime files and dependencies separately, excludes upstream signing credentials, uses ad hoc signing on macOS, and disables automatic publishing and in-app updates for these manually distributed prereleases.
+Packaging stages runtime files and dependencies separately, excludes upstream signing credentials, uses ad hoc signing on macOS, and disables automatic publishing and in-app updates for these manually distributed releases.
