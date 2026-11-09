@@ -8,6 +8,7 @@ import { useDecoder } from '../../hooks/useDecoder'
 export interface TreeNodeProps extends React.HTMLAttributes<HTMLElement> {
   treeNode: q.TreeNode<TopicViewModel>
   lastUpdate: number
+  isMobile?: boolean
   name?: string | undefined
   collapsed?: boolean | undefined
   didSelectNode: any
@@ -54,7 +55,7 @@ export function TreeNodeTitle(props: TreeNodeProps) {
 
     // On mobile, the expand button has its own click handler separate from topic selection
     // On desktop, clicking anywhere (including expander) selects and toggles via didClickTitle
-    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768
+    const { isMobile } = props
     const onClick = isMobile ? props.toggleCollapsed : undefined
 
     return (
@@ -99,36 +100,37 @@ export function TreeNodeTitle(props: TreeNodeProps) {
 }
 
 const styles = (theme: Theme) => {
-  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768
-
   return {
     value: {
       whiteSpace: 'nowrap' as const,
       overflow: 'hidden' as const,
       textOverflow: 'ellipsis' as const,
       padding: '0',
-      fontSize: isMobile ? '15px' : 'inherit', // Slightly larger on mobile
+      '.mobile-topic-tree &': { fontSize: '15px' },
     },
     sourceEdge: {
       fontWeight: 'bold' as const,
       overflow: 'hidden' as const,
-      fontSize: isMobile ? '16px' : 'inherit', // Base 16px on mobile to prevent zoom
+      '.mobile-topic-tree &': { fontSize: '16px' },
     },
     expander: {
       color: theme.palette.mode === 'light' ? '#222' : '#eee',
       cursor: 'pointer' as const,
-      paddingRight: isMobile ? theme.spacing(1) : theme.spacing(0.25), // Larger touch area
-      paddingLeft: isMobile ? theme.spacing(0.5) : 0,
-      minWidth: isMobile ? '32px' : 'auto', // 40px total width on mobile for touch
+      paddingRight: theme.spacing(0.25),
       display: 'inline-block' as const,
       textAlign: 'center' as const,
       userSelect: 'none' as const,
-      fontSize: isMobile ? '18px' : 'inherit', // Larger icon on mobile
+      '.mobile-topic-tree &': {
+        paddingRight: theme.spacing(1),
+        paddingLeft: theme.spacing(0.5),
+        minWidth: '32px',
+        fontSize: '18px',
+      },
     },
     collapsedSubnodes: {
       color: theme.palette.text.secondary,
       userSelect: 'none' as const,
-      fontSize: isMobile ? '14px' : 'inherit',
+      '.mobile-topic-tree &': { fontSize: '14px' },
     },
   }
 }

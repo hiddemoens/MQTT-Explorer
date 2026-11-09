@@ -109,6 +109,7 @@ interface Props {
   topicOrder: TopicOrder
   visible: boolean
   theme: 'light' | 'dark'
+  forceDesktopLayout: boolean
 }
 
 class Settings extends React.PureComponent<Props, {}> {
@@ -246,6 +247,13 @@ class Settings extends React.PureComponent<Props, {}> {
           {this.renderHighlightTopicUpdates()}
           {this.selectTopicsOnMouseOver()}
           {this.toggleTheme()}
+          <BooleanSwitch
+            title="Force Desktop Layout"
+            tooltip="Keep the desktop layout in narrow windows"
+            value={this.props.forceDesktopLayout}
+            action={() => actions.settings.setForceDesktopLayout(!this.props.forceDesktopLayout)}
+            data-testid="force-desktop-layout-toggle"
+          />
         </div>
         <Tooltip placement="top" title="App Author">
           <Typography className={classes.author} onClick={this.openGithubPage}>
@@ -311,6 +319,7 @@ const mapStateToProps = (state: AppState) => ({
   highlightTopicUpdates: state.settings.get('highlightTopicUpdates'),
   selectTopicWithMouseOver: state.settings.get('selectTopicWithMouseOver'),
   theme: state.settings.get('theme'),
+  forceDesktopLayout: state.settings.get('forceDesktopLayout'),
 })
 
 const mapDispatchToProps = (dispatch: any) => ({

@@ -2,8 +2,6 @@ import { blueGrey } from '@mui/material/colors'
 import { Theme } from '@mui/material/styles'
 
 export const styles = (theme: Theme) => {
-  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768
-
   return {
     animationLight: {
       willChange: 'auto',
@@ -27,7 +25,8 @@ export const styles = (theme: Theme) => {
       overflow: 'hidden' as const,
       textOverflow: 'ellipsis' as const,
       whiteSpace: 'nowrap' as const,
-      padding: isMobile ? '1px 0px' : '1px 0px 0px 0px',
+      padding: '1px 0px 0px 0px',
+      '.mobile-topic-tree &': { padding: '1px 0px' },
     },
     topicSelect: {
       float: 'right' as const,
@@ -36,7 +35,8 @@ export const styles = (theme: Theme) => {
       marginTop: '-1px',
     },
     subnodes: {
-      marginLeft: isMobile ? theme.spacing(2) : theme.spacing(1.5), // Increased indentation on mobile
+      marginLeft: theme.spacing(1.5),
+      '.mobile-topic-tree &': { marginLeft: theme.spacing(2) },
     },
     selected: {
       backgroundColor: `${theme.palette.mode === 'light' ? blueGrey[300] : theme.palette.action.selected} !important`,
@@ -44,20 +44,23 @@ export const styles = (theme: Theme) => {
     hover: {},
     title: {
       borderRadius: '4px',
-      lineHeight: isMobile ? '1.3em' : '1em',
+      lineHeight: '1em',
       display: 'inline-block' as const,
       whiteSpace: 'nowrap' as const,
-      minHeight: isMobile ? '40px' : '14px', // 44px touch target on mobile (WCAG AA minimum)
+      minHeight: '14px',
       height: 'auto' as const,
-      padding: isMobile ? '8px 8px' : '1px 4px 0 4px', // Reduced padding, still touch-friendly
+      padding: '1px 4px 0 4px',
       margin: '1px 0px',
-      fontSize: isMobile ? '16px' : 'inherit', // Prevent iOS zoom on focus
       cursor: 'pointer' as const,
       '&:hover': {
         backgroundColor: theme.palette.mode === 'light' ? blueGrey[100] : theme.palette.action.hover,
       },
       // Better touch feedback on mobile
-      [theme.breakpoints.down('md')]: {
+      '.mobile-topic-tree &': {
+        lineHeight: '1.3em',
+        minHeight: '40px',
+        padding: '8px',
+        fontSize: '16px',
         WebkitTapHighlightColor: 'transparent',
         touchAction: 'manipulation',
       },

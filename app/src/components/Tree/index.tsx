@@ -14,9 +14,6 @@ const MovingAverage = require('moving-average')
 const averagingTimeInterval = 10 * 1000
 const average = MovingAverage(averagingTimeInterval)
 
-// Mobile viewport breakpoint - matches CSS media queries in ContentView
-const MOBILE_BREAKPOINT = 768
-
 declare let window: any
 
 interface Props {
@@ -26,11 +23,11 @@ interface Props {
   host?: string
   paused: boolean
   settings: SettingsState
+  isMobile?: boolean
 }
 
 interface State {
   lastUpdate: number
-  isMobile: boolean
 }
 
 function useArrowKeyEventHandler(actions: typeof treeActions) {
@@ -59,8 +56,6 @@ function useArrowKeyEventHandler(actions: typeof treeActions) {
 class TreeComponent extends React.PureComponent<Props, State> {
   private updateTimer?: any
 
-  private resizeTimer?: any
-
   private perf: number = 0
 
   private renderTime = 0
@@ -69,7 +64,6 @@ class TreeComponent extends React.PureComponent<Props, State> {
     super(props)
     this.state = {
       lastUpdate: 0,
-      isMobile: typeof window !== 'undefined' && window.innerWidth <= MOBILE_BREAKPOINT,
     }
   }
 
@@ -77,27 +71,6 @@ class TreeComponent extends React.PureComponent<Props, State> {
 
   private performanceCallback = (ms: number) => {
     average.push(Date.now(), ms)
-  }
-
-  private handleResize = () => {
-    // Debounce resize events - only update after user stops resizing
-    if (this.resizeTimer) {
-      clearTimeout(this.resizeTimer)
-    }
-
-    this.resizeTimer = setTimeout(() => {
-      const isMobile = typeof window !== 'undefined' && window.innerWidth <= MOBILE_BREAKPOINT
-      if (this.state.isMobile !== isMobile) {
-        this.setState({ isMobile })
-      }
-      this.resizeTimer = undefined
-    }, 150) // Wait 150ms after last resize event
-  }
-
-  public componentDidMount() {
-    if (typeof window !== 'undefined') {
-      window.addEventListener('resize', this.handleResize)
-    }
   }
 
   public componentWillReceiveProps(nextProps: Props) {
@@ -114,14 +87,6 @@ class TreeComponent extends React.PureComponent<Props, State> {
 
   public componentWillUnmount() {
     this.props.tree && this.props.tree.didUpdate.unsubscribe(this.throttledTreeUpdate)
-    if (typeof window !== 'undefined') {
-      window.removeEventListener('resize', this.handleResize)
-    }
-    // Clean up any pending timers to prevent memory leaks
-    if (this.resizeTimer) {
-      clearTimeout(this.resizeTimer)
-      this.resizeTimer = undefined
-    }
     if (this.updateTimer) {
       clearTimeout(this.updateTimer)
       this.updateTimer = undefined
@@ -173,12 +138,12 @@ class TreeComponent extends React.PureComponent<Props, State> {
       return null
     }
 
-    const { isMobile } = this.state
+    const { isMobile } = this.props
 
     const style: React.CSSProperties = {
       lineHeight: '1.1',
       cursor: 'default',
-      overflowY: 'scroll',
+      overflowY: 'auto',
       overflowX: isMobile ? 'auto' : 'hidden', // Enable horizontal scrolling on mobile
       height: '100%',
       width: '100%',
@@ -194,6 +159,7 @@ class TreeComponent extends React.PureComponent<Props, State> {
       <TreeNode
         key={tree.hash()}
         isRoot
+        isMobile={isMobile}
         treeNode={tree}
         name={this.props.host}
         collapsed={false}
@@ -205,7 +171,12 @@ class TreeComponent extends React.PureComponent<Props, State> {
     )
 
     return (
-      <div style={style} tabIndex={0} onKeyDown={this.keyEventHandler}>
+      <div
+        className={isMobile ? 'topic-tree mobile-topic-tree' : 'topic-tree'}
+        style={style}
+        tabIndex={0}
+        onKeyDown={this.keyEventHandler}
+      >
         {isMobile ? <div style={{ scrollSnapAlign: 'start', minWidth: '100%' }}>{treeNode}</div> : treeNode}
       </div>
     )

@@ -160,6 +160,11 @@ function autoExpandLimitForTree(tree: q.Tree<TopicViewModel>) {
   return closestExistingLimit(calculatedLimit)
 }
 
+export const setForceDesktopLayout = (forceDesktopLayout: boolean) => (dispatch: Dispatch<any>) => {
+  dispatch({ type: ActionTypes.SETTINGS_SET_FORCE_DESKTOP_LAYOUT, forceDesktopLayout })
+  dispatch(storeSettings())
+}
+
 export const toggleTheme = () => (dispatch: Dispatch<any>, getState: () => AppState) => {
   dispatch({
     type:

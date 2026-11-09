@@ -16,6 +16,7 @@ export interface Props {
   selectedTopic?: q.TreeNode<TopicViewModel>
   selectTopicAction: (treeNode: q.TreeNode<any>) => void
   settings: SettingsState
+  isMobile?: boolean
   actions: typeof treeActions
   theme: Theme
 }
@@ -53,6 +54,7 @@ function TreeNodeSubnodes(props: Props) {
       <TreeNode
         key={`${node.hash()}-${props.filter}`}
         treeNode={node}
+        isMobile={props.isMobile}
         lastUpdate={node.lastUpdate}
         selectTopicAction={props.selectTopicAction}
         settings={props.settings}
@@ -61,7 +63,7 @@ function TreeNodeSubnodes(props: Props) {
     ))
 
     return <span className={props.classes.list}>{listItems}</span>
-  }, [alreadyAdded, props.treeNode.lastUpdate, props.theme, props.settings])
+  }, [alreadyAdded, props.treeNode.lastUpdate, props.theme, props.settings, props.isMobile])
 }
 
 const styles = (theme: Theme) => ({

@@ -43,6 +43,22 @@ describe('ContentView responsive hooks', () => {
       expect(Boolean(view.queryByText('Mobile tabs'))).to.equal(width <= 768)
     }
   })
+  it('keeps the desktop panes when forced and restores responsive layout when turned off', () => {
+    const layout = (forceDesktopLayout: boolean) => (
+      <ContentView chartPanelItems={List()} paneDefaults="" heightProperty="" forceDesktopLayout={forceDesktopLayout} />
+    )
+    resize(600)
+    const view = render(layout(false))
+    expect(view.queryByText('Mobile tabs')).not.to.equal(null)
+    view.rerender(layout(true))
+    expect(view.queryByText('Mobile tabs')).to.equal(null)
+    expect((window as any).switchToDetailsTab).to.equal(undefined)
+    resize(1200)
+    resize(500)
+    expect(view.queryByText('Mobile tabs')).to.equal(null)
+    view.rerender(layout(false))
+    expect(view.queryByText('Mobile tabs')).not.to.equal(null)
+  })
   it('registers working mobile tab callbacks and removes them on desktop/unmount', () => {
     resize(600)
     const view = render(<ContentView chartPanelItems={List()} paneDefaults="" heightProperty="" />)

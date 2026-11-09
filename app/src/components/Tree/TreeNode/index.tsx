@@ -16,6 +16,7 @@ import { useSelectionState } from './effects/useSelectionState'
 
 export interface Props {
   isRoot?: boolean
+  isMobile?: boolean
   treeNode: q.TreeNode<TopicViewModel>
   name?: string | undefined
   collapsed?: boolean | undefined
@@ -62,9 +63,7 @@ function TreeNodeComponent(props: Props) {
     (event: React.MouseEvent) => {
       event.stopPropagation()
 
-      const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768
-
-      if (isMobile) {
+      if (props.isMobile) {
         // Mobile: Only select the topic (no toggle)
         // Expanding is handled by the separate expand button click
         didSelectTopic()
@@ -78,7 +77,7 @@ function TreeNodeComponent(props: Props) {
         setCollapsedOverride(!isCollapsed)
       }
     },
-    [isCollapsed, didSelectTopic]
+    [isCollapsed, didSelectTopic, props.isMobile]
   )
 
   const toggleCollapsed = useCallback(
@@ -115,6 +114,7 @@ function TreeNodeComponent(props: Props) {
 
       return (
         <TreeNodeSubnodes
+          isMobile={props.isMobile}
           treeNode={treeNode}
           lastUpdate={treeNode.lastUpdate}
           selectTopicAction={props.selectTopicAction}
@@ -146,6 +146,7 @@ function TreeNodeComponent(props: Props) {
             toggleCollapsed={toggleCollapsed}
             didSelectNode={didSelectTopic}
             collapsed={isCollapsed}
+            isMobile={props.isMobile}
             treeNode={treeNode}
             name={name}
           />
@@ -153,7 +154,7 @@ function TreeNodeComponent(props: Props) {
         {renderNodes()}
       </div>
     )
-  }, [treeNode.lastUpdate, treeNode, name, isCollapsed, selected, theme, mouseOver, settings])
+  }, [treeNode.lastUpdate, treeNode, name, isCollapsed, selected, theme, mouseOver, settings, props.isMobile])
 }
 
 export default withStyles(styles, { withTheme: true })(React.memo(TreeNodeComponent))

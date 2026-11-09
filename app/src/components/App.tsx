@@ -23,6 +23,7 @@ interface Props {
   connectionId: string
   classes: any
   settingsVisible: boolean
+  forceDesktopLayout: boolean
   error?: string
   notification?: string
   actions: typeof globalActions
@@ -73,7 +74,7 @@ class App extends React.PureComponent<Props, {}> {
     const anyProps: any = {}
 
     return (
-      <div className={centerContent}>
+      <div className={`${centerContent}${this.props.forceDesktopLayout ? ' force-desktop-layout' : ''}`}>
         <CssBaseline />
         <ErrorBoundary>
           <ConfirmationDialog confirmationRequests={this.props.confirmationRequests} />
@@ -155,6 +156,7 @@ const mapDispatchToProps = (dispatch: any) => ({
 
 const mapStateToProps = (state: AppState) => ({
   settingsVisible: state.globalState.get('settingsVisible'),
+  forceDesktopLayout: state.settings.get('forceDesktopLayout'),
   connectionId: state.connection.connectionId,
   error: state.globalState.get('error'),
   notification: state.globalState.get('notification'),

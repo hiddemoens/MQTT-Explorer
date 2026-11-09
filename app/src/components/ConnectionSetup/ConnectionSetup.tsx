@@ -124,7 +124,7 @@ const styles = (theme: Theme) => ({
     },
   },
   left: {
-    borderRightStyle: 'dotted' as const,
+    borderRight: `1px solid ${theme.palette.divider}`,
     borderRadius: `${theme.shape.borderRadius}px 0 0 ${theme.shape.borderRadius}px`,
     paddingTop: theme.spacing(2),
     flex: 3,

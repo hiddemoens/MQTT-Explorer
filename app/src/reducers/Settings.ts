@@ -18,6 +18,7 @@ export interface SettingsStateModel {
   valueRendererDisplayMode: ValueRendererDisplayMode
   selectTopicWithMouseOver: boolean
   theme: 'light' | 'dark'
+  forceDesktopLayout: boolean
 }
 
 export type SettingsState = Record<SettingsStateModel>
@@ -30,7 +31,8 @@ export type Actions = SetAutoExpandLimitAction &
   SetValueRendererDisplayModeAction &
   SetTheme &
   SetSelectTopicWithMouseOverAction &
-  SetTimeLocale
+  SetTimeLocale &
+  SetForceDesktopLayout
 
 export enum ActionTypes {
   SETTINGS_SET_AUTO_EXPAND_LIMIT = 'SETTINGS_SET_AUTO_EXPAND_LIMIT',
@@ -42,6 +44,7 @@ export enum ActionTypes {
   SETTINGS_SET_SELECT_TOPIC_WITH_MOUSE_OVER = 'SETTINGS_SET_SELECT_TOPIC_WITH_MOUSE_OVER',
   SETTINGS_SET_THEME_LIGHT = 'SETTINGS_SET_THEME_LIGHT',
   SETTINGS_SET_THEME_DARK = 'SETTINGS_SET_THEME_DARK',
+  SETTINGS_SET_FORCE_DESKTOP_LAYOUT = 'SETTINGS_SET_FORCE_DESKTOP_LAYOUT',
   SETTINGS_SET_TIME_LOCALE = 'SETTINGS_SET_TIME_LOCALE',
 }
 
@@ -53,6 +56,7 @@ const initialState = Record<SettingsStateModel>({
   valueRendererDisplayMode: 'diff',
   selectTopicWithMouseOver: false,
   theme: 'light',
+  forceDesktopLayout: false,
   topicFilter: undefined,
 })
 
@@ -71,9 +75,15 @@ const reducerActions: {
   SETTINGS_SET_THEME_LIGHT: setTheme('light'),
   SETTINGS_SET_THEME_DARK: setTheme('dark'),
   SETTINGS_SET_TIME_LOCALE: setTimeLocale,
+  SETTINGS_SET_FORCE_DESKTOP_LAYOUT: (state, action) => state.set('forceDesktopLayout', action.forceDesktopLayout),
 }
 
 export const settingsReducer = createReducer(initialState(), reducerActions)
+
+interface SetForceDesktopLayout {
+  type: ActionTypes.SETTINGS_SET_FORCE_DESKTOP_LAYOUT
+  forceDesktopLayout: boolean
+}
 
 export interface SetTheme {
   type: ActionTypes.SETTINGS_SET_THEME_LIGHT | ActionTypes.SETTINGS_SET_THEME_DARK

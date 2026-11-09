@@ -18,22 +18,22 @@ interface Props {
   paneDefaults: any
   connectionId?: string
   chartPanelItems: List<ChartParameters>
+  forceDesktopLayout: boolean
 }
 
 function ContentView(props: Props) {
-  // Use different defaults for mobile viewports (<=768px width)
-  // Use state for mobile detection that updates on resize
-  const [isMobile, setIsMobile] = React.useState(() => typeof window !== 'undefined' && window.innerWidth <= 768)
+  const [isNarrow, setIsNarrow] = React.useState(() => typeof window !== 'undefined' && window.innerWidth <= 768)
+  const isMobile = isNarrow && !props.forceDesktopLayout
   const [mobileTab, setMobileTab] = React.useState(0) // 0 = topics, 1 = details and publish, 2 = charts
   const [height, setHeight] = React.useState<string | number>('100%')
-  const [sidebarWidth, setSidebarWidth] = React.useState<string | number>(isMobile ? '100%' : '40%')
+  const [sidebarWidth, setSidebarWidth] = React.useState<string | number>('40%')
   const [detectedHeight, setDetectedHeight] = React.useState(0)
   const [detectedSidebarWidth, setDetectedSidebarWidth] = React.useState(0)
 
   // Update mobile state on resize
   React.useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768)
+      setIsNarrow(window.innerWidth <= 768)
     }
 
     // Set initial state
@@ -160,7 +160,7 @@ function ContentView(props: Props) {
             aria-labelledby="mobile-tab-0"
             style={{ ...treeContainerStyle, display: mobileTab === 0 ? 'block' : 'none' }}
           >
-            <Tree />
+            <Tree isMobile />
           </div>
           {/* Details and Publish - keep mounted, toggle visibility */}
           <div
@@ -252,6 +252,7 @@ function ContentView(props: Props) {
 }
 
 const mapStateToProps = (state: AppState) => ({
+  forceDesktopLayout: state.settings.get('forceDesktopLayout'),
   chartPanelItems: state.charts.get('charts'),
 })
 
