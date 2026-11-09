@@ -87,39 +87,32 @@ function ContentView(props: Props) {
     }
   }, [props.chartPanelItems])
 
+  // Keep effects unconditional: resizing must not change hook order.
+  React.useEffect(() => {
+    if (!isMobile) return
+    const target = window as any
+    target.switchToDetailsTab = () => setMobileTab(1)
+    target.switchToTopicsTab = () => setMobileTab(0)
+    target.switchToPublishTab = () => setMobileTab(2)
+    target.switchToChartsTab = () => setMobileTab(3)
+    return () => {
+      delete target.switchToDetailsTab
+      delete target.switchToTopicsTab
+      delete target.switchToPublishTab
+      delete target.switchToChartsTab
+    }
+  }, [isMobile])
+
+  React.useEffect(() => {
+    if (!isMobile || mobileTab !== 0) return
+    const timer = setTimeout(() => {
+      document.querySelector('.tree .selected')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }, 100)
+    return () => clearTimeout(timer)
+  }, [isMobile, mobileTab])
+
   // Mobile view with tab switcher
   if (isMobile) {
-    // Expose tab switching functions for other components to call
-    React.useEffect(() => {
-      if (typeof window !== 'undefined') {
-        ;(window as any).switchToDetailsTab = () =>
-          (setMobileTab(1)(window as any).switchToTopicsTab = () => setMobileTab(0))
-        ;(window as any).switchToPublishTab = () => setMobileTab(2)
-        ;(window as any).switchToChartsTab = () => setMobileTab(3)
-      }
-      return () => {
-        if (typeof window !== 'undefined') {
-          delete (window as any).switchToDetailsTab
-          delete (window as any).switchToTopicsTab
-          delete (window as any).switchToPublishTab
-          delete (window as any).switchToChartsTab
-        }
-      }
-    }, [])
-
-    // Scroll to selected topic when returning to tree tab
-    React.useEffect(() => {
-      if (mobileTab === 0) {
-        // Delay to ensure DOM is rendered
-        setTimeout(() => {
-          const selectedNode = document.querySelector('.tree .selected')
-          if (selectedNode) {
-            selectedNode.scrollIntoView({ behavior: 'smooth', block: 'center' })
-          }
-        }, 100)
-      }
-    }, [mobileTab])
-
     const mobileContainerStyle: React.CSSProperties = {
       display: 'flex',
       flexDirection: 'column',

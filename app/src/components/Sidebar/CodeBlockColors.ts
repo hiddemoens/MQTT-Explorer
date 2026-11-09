@@ -10,10 +10,10 @@ export enum CodeBlockColors {
 
 export enum CodeBlockColorsBraceMonokai {
   text = '#F8F8F2',
-  background = '#272822',
+  background = '#32363e',
   numeric = '#AE81FF',
   boolean = '#AE81FF',
   string = '#E6DB74',
   variable = '#A6E22E',
-  gutters = '#2F3129',
+  gutters = '#3d424c',
 }

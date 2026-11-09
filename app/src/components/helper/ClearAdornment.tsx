@@ -1,7 +1,6 @@
 import * as React from 'react'
 import Clear from '@mui/icons-material/Clear'
-import { IconButton, Theme } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { IconButton } from '@mui/material'
 
 interface Props {
   value?: string
@@ -14,15 +13,13 @@ interface Props {
  * Clear button for text input fields
  */
 function ClearAdornment(props: Props) {
-  const theme = useTheme()
-
   if (!props.value) {
     return null
   }
 
-  const color = props.variant === 'primary' ? theme.palette.primary.contrastText : undefined
+  const color = props.variant === 'primary' ? 'inherit' : undefined
   return (
-    <IconButton style={{ ...props.style, padding: '1px' }} onClick={props.action}>
+    <IconButton color="inherit" style={{ ...props.style, padding: '1px' }} onClick={props.action}>
       <Clear style={{ color, fontSize: '16px' }} />
     </IconButton>
   )

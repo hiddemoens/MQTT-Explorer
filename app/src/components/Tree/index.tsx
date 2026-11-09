@@ -182,7 +182,6 @@ class TreeComponent extends React.PureComponent<Props, State> {
       overflowX: isMobile ? 'auto' : 'hidden', // Enable horizontal scrolling on mobile
       height: '100%',
       width: '100%',
-      outline: '24px black !important',
       paddingBottom: '16px', // avoid conflict with chart panel Resizer
       // Scroll snap to default position on mobile
       ...(isMobile && {

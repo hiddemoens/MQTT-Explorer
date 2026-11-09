@@ -112,6 +112,7 @@ const styles = (theme: Theme) => ({
     marginRight: theme.spacing(2),
     marginLeft: 0,
     flexGrow: 1,
+    minWidth: 0,
     maxWidth: '60%',
 
     [theme.breakpoints.up('md')]: {

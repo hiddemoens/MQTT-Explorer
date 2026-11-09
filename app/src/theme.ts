@@ -16,6 +16,29 @@ const darkTheme = createTheme({
   ...(baseTheme as any),
   palette: {
     mode: 'dark',
+    background: { default: '#26292e', paper: '#32363e' },
+    text: { primary: '#f0f3f8', secondary: '#c5ccd6', disabled: '#b0b8c4' },
+    primary: { main: '#91caff', light: '#badfff', dark: '#64aceb', contrastText: '#17212b' },
+    divider: '#68717f',
+    action: {
+      active: '#e5ebf3',
+      hover: '#3c424b',
+      selected: '#3b5067',
+      disabled: '#aab3c0',
+      disabledBackground: 'rgba(229,235,243,0.12)',
+    },
+  },
+  components: {
+    MuiAppBar: { styleOverrides: { root: { backgroundColor: '#32363e', color: '#f0f3f8', backgroundImage: 'none' } } },
+    MuiInputBase: { styleOverrides: { input: { '&::placeholder': { color: '#c5ccd6', opacity: 1 } } } },
+    MuiOutlinedInput: { styleOverrides: { notchedOutline: { borderColor: '#818b9a' } } },
+    MuiCssBaseline: {
+      styleOverrides: {
+        body: { colorScheme: 'dark' },
+        '.ace-monokai': { backgroundColor: '#32363e', color: '#f0f3f8' },
+        '.ace-monokai .ace_gutter': { backgroundColor: '#3d424c', color: '#c5ccd6' },
+      },
+    },
   },
 })
 

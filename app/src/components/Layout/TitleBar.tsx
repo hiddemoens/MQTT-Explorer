@@ -40,21 +40,26 @@ const styles = (theme: Theme) => ({
     marginRight: 20,
   },
   disconnect: {
-    margin: 'auto 8px auto auto',
+    margin: 0,
     // Hide on mobile (<=768px)
     [theme.breakpoints.down('md')]: {
       display: 'none' as const,
     },
   },
   logout: {
-    margin: 'auto 0 auto 8px',
+    margin: 0,
     // Hide on mobile (<=768px)
     [theme.breakpoints.down('md')]: {
       display: 'none' as const,
     },
   },
-  disconnectLabel: {
-    color: theme.palette.primary.contrastText,
+  connectionActions: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(1),
+    marginLeft: 'auto',
+    flexShrink: 0,
+    color: 'inherit',
   },
 })
 
@@ -108,17 +113,19 @@ class TitleBar extends React.PureComponent<Props, {}> {
             MQTT Explorer
           </Typography>
           <SearchBar />
-          <PauseButton />
-          <Button
-            className={classes.disconnect}
-            sx={{ color: 'primary.contrastText' }}
-            onClick={actions.connection.disconnect}
-            data-testid="disconnect-button"
-          >
-            Disconnect <CloudOff className={classes.disconnectIcon} />
-          </Button>
-          <LogoutButton classes={classes} onLogout={this.handleLogout} />
-          <ConnectionHealthIndicatorAny withBackground />
+          <div className={classes.connectionActions} role="group" aria-label="Connection controls">
+            <PauseButton />
+            <Button
+              className={classes.disconnect}
+              color="inherit"
+              onClick={actions.connection.disconnect}
+              data-testid="disconnect-button"
+            >
+              Disconnect <CloudOff className={classes.disconnectIcon} />
+            </Button>
+            <LogoutButton classes={classes} onLogout={this.handleLogout} />
+            <ConnectionHealthIndicatorAny withBackground />
+          </div>
         </Toolbar>
       </AppBar>
     )
@@ -134,7 +141,7 @@ function LogoutButton({ classes, onLogout }: { classes: any; onLogout: () => voi
   }
 
   return (
-    <Button className={classes.logout} sx={{ color: 'primary.contrastText' }} onClick={onLogout}>
+    <Button className={classes.logout} color="inherit" onClick={onLogout}>
       Logout <Logout className={classes.disconnectIcon} />
     </Button>
   )

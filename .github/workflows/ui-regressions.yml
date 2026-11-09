@@ -1,0 +1,24 @@
+name: UI regressions
+
+on:
+  push:
+    branches: [master, codex/ui-contrast-resize]
+    paths: ['app/src/**', '.github/workflows/ui-regressions.yml']
+  pull_request:
+    paths: ['app/src/**', '.github/workflows/ui-regressions.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  resize-and-contrast:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci --ignore-scripts --legacy-peer-deps --no-audit --no-fund
+      - run: npx --yes yarn@1.22.22 --cwd app install --frozen-lockfile --ignore-scripts --non-interactive
+      - name: Test responsive hook order and dark theme contrast
+        run: node node_modules/mocha/bin/mocha.js --require tsx app/src/components/Layout/ContentView.spec.tsx app/src/utils/spec/themeContrast.spec.ts

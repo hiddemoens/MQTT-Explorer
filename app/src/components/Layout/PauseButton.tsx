@@ -12,7 +12,7 @@ import { AppState } from '../../reducers'
 
 const styles = (theme: Theme) => ({
   icon: {
-    color: theme.palette.primary.contrastText,
+    color: 'inherit',
     verticalAlign: 'middle' as const,
   },
   bufferStats: {

@@ -10,13 +10,13 @@ import { AppState } from '../../reducers'
 
 const styles = (theme: Theme) => ({
   offline: {
-    color: red[700],
+    color: theme.palette.mode === 'dark' ? theme.palette.error.light : red[700],
   },
   online: {
     color: green[400],
   },
   connecting: {
-    color: orange[600],
+    color: theme.palette.mode === 'dark' ? theme.palette.warning.light : orange[600],
   },
   icon: {
     boxShadow: theme.shadows[2]
@@ -25,7 +25,8 @@ const styles = (theme: Theme) => ({
       .join('),'),
     padding: '6px',
     borderRadius: '50%',
-    backgroundColor: '#eee',
+    backgroundColor: theme.palette.background.paper,
+    border: `1px solid ${theme.palette.divider}`,
     width: '35px',
     height: '35px',
   },

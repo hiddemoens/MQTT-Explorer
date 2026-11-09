@@ -39,7 +39,7 @@ export const styles = (theme: Theme) => {
       marginLeft: isMobile ? theme.spacing(2) : theme.spacing(1.5), // Increased indentation on mobile
     },
     selected: {
-      backgroundColor: `${theme.palette.mode === 'light' ? blueGrey[300] : theme.palette.primary.main} !important`,
+      backgroundColor: `${theme.palette.mode === 'light' ? blueGrey[300] : theme.palette.action.selected} !important`,
     },
     hover: {},
     title: {
@@ -54,7 +54,7 @@ export const styles = (theme: Theme) => {
       fontSize: isMobile ? '16px' : 'inherit', // Prevent iOS zoom on focus
       cursor: 'pointer' as const,
       '&:hover': {
-        backgroundColor: theme.palette.mode === 'light' ? blueGrey[100] : theme.palette.primary.light,
+        backgroundColor: theme.palette.mode === 'light' ? blueGrey[100] : theme.palette.action.hover,
       },
       // Better touch feedback on mobile
       [theme.breakpoints.down('md')]: {

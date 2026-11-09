@@ -40,6 +40,7 @@ class CustomIconButton extends React.PureComponent<Props, {}> {
   public render() {
     return (
       <IconButton
+        color="inherit"
         className={this.props.classes.button}
         style={this.props.style}
         onClick={this.onClick}
