@@ -20,5 +20,5 @@ jobs:
           node-version: '24'
       - run: npm ci --ignore-scripts --legacy-peer-deps --no-audit --no-fund
       - run: npx --yes yarn@1.22.22 --cwd app install --frozen-lockfile --ignore-scripts --non-interactive
-      - name: Test responsive hook order and dark theme contrast
-        run: node node_modules/mocha/bin/mocha.js --require tsx app/src/components/Layout/ContentView.spec.tsx app/src/utils/spec/themeContrast.spec.ts
+      - name: Test responsive layout and dark theme contrast
+        run: node node_modules/mocha/bin/mocha.js --require tsx app/src/components/Layout/ContentView.spec.tsx app/src/utils/spec/themeContrast.spec.ts app/src/components/Sidebar/Sidebar.spec.tsx

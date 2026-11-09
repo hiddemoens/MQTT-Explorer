@@ -9,7 +9,6 @@ import { AppState } from '../../reducers'
 import { ChartParameters } from '../../reducers/Charts'
 import { Sidebar } from '../Sidebar'
 import MobileTabs from './MobileTabs'
-import PublishTab from '../Sidebar/PublishTab'
 
 // Type cast to any to work around React 18 compatibility issues with react-split-pane 0.1.x
 const ReactSplitPane = ReactSplitPaneImport as any
@@ -25,7 +24,7 @@ function ContentView(props: Props) {
   // Use different defaults for mobile viewports (<=768px width)
   // Use state for mobile detection that updates on resize
   const [isMobile, setIsMobile] = React.useState(() => typeof window !== 'undefined' && window.innerWidth <= 768)
-  const [mobileTab, setMobileTab] = React.useState(0) // 0 = topics, 1 = details, 2 = publish, 3 = charts
+  const [mobileTab, setMobileTab] = React.useState(0) // 0 = topics, 1 = details and publish, 2 = charts
   const [height, setHeight] = React.useState<string | number>('100%')
   const [sidebarWidth, setSidebarWidth] = React.useState<string | number>(isMobile ? '100%' : '40%')
   const [detectedHeight, setDetectedHeight] = React.useState(0)
@@ -93,12 +92,10 @@ function ContentView(props: Props) {
     const target = window as any
     target.switchToDetailsTab = () => setMobileTab(1)
     target.switchToTopicsTab = () => setMobileTab(0)
-    target.switchToPublishTab = () => setMobileTab(2)
-    target.switchToChartsTab = () => setMobileTab(3)
+    target.switchToChartsTab = () => setMobileTab(2)
     return () => {
       delete target.switchToDetailsTab
       delete target.switchToTopicsTab
-      delete target.switchToPublishTab
       delete target.switchToChartsTab
     }
   }, [isMobile])
@@ -157,19 +154,30 @@ function ContentView(props: Props) {
         <MobileTabs value={mobileTab} onChange={setMobileTab} />
         <div style={tabContentStyle}>
           {/* Topics tab - keep mounted, toggle visibility */}
-          <div style={{ ...treeContainerStyle, display: mobileTab === 0 ? 'block' : 'none' }}>
+          <div
+            role="tabpanel"
+            id="mobile-tabpanel-0"
+            aria-labelledby="mobile-tab-0"
+            style={{ ...treeContainerStyle, display: mobileTab === 0 ? 'block' : 'none' }}
+          >
             <Tree />
           </div>
-          {/* Details tab - keep mounted, toggle visibility */}
-          <div style={{ ...sidebarContainerStyle, display: mobileTab === 1 ? 'block' : 'none' }}>
+          {/* Details and Publish - keep mounted, toggle visibility */}
+          <div
+            role="tabpanel"
+            id="mobile-tabpanel-1"
+            aria-labelledby="mobile-tab-1"
+            style={{ ...sidebarContainerStyle, display: mobileTab === 1 ? 'block' : 'none' }}
+          >
             <Sidebar connectionId={props.connectionId} />
           </div>
-          {/* Publish tab - keep mounted, toggle visibility */}
-          <div style={{ ...sidebarContainerStyle, display: mobileTab === 2 ? 'block' : 'none' }}>
-            <PublishTab connectionId={props.connectionId} />
-          </div>
           {/* Charts tab - keep mounted, toggle visibility */}
-          <div style={{ ...sidebarContainerStyle, display: mobileTab === 3 ? 'block' : 'none' }}>
+          <div
+            role="tabpanel"
+            id="mobile-tabpanel-2"
+            aria-labelledby="mobile-tab-2"
+            style={{ ...sidebarContainerStyle, display: mobileTab === 2 ? 'block' : 'none' }}
+          >
             <ChartPanel />
           </div>
         </div>

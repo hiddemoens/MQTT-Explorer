@@ -4,7 +4,6 @@ import { Theme } from '@mui/material/styles'
 import { withStyles } from '@mui/styles'
 import AccountTreeIcon from '@mui/icons-material/AccountTree'
 import InfoIcon from '@mui/icons-material/Info'
-import SendIcon from '@mui/icons-material/Send'
 import ShowChartIcon from '@mui/icons-material/ShowChart'
 
 interface Props {
@@ -26,7 +25,7 @@ function MobileTabs(props: Props) {
         variant="fullWidth"
         indicatorColor="primary"
         textColor="primary"
-        aria-label="Topics, Details, Publish and Charts tabs"
+        aria-label="Topics, Details and Charts tabs"
       >
         <Tab
           icon={<AccountTreeIcon />}
@@ -40,25 +39,17 @@ function MobileTabs(props: Props) {
           icon={<InfoIcon />}
           label="Details"
           data-testid="mobile-tab-details"
-          aria-label="View topic details"
+          aria-label="View topic details and publish"
           id="mobile-tab-1"
           aria-controls="mobile-tabpanel-1"
-        />
-        <Tab
-          icon={<SendIcon />}
-          label="Publish"
-          data-testid="mobile-tab-publish"
-          aria-label="Publish messages"
-          id="mobile-tab-2"
-          aria-controls="mobile-tabpanel-2"
         />
         <Tab
           icon={<ShowChartIcon />}
           label="Charts"
           data-testid="mobile-tab-charts"
           aria-label="View charts"
-          id="mobile-tab-3"
-          aria-controls="mobile-tabpanel-3"
+          id="mobile-tab-2"
+          aria-controls="mobile-tabpanel-2"
         />
       </Tabs>
     </Box>

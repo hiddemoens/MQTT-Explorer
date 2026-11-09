@@ -11,7 +11,7 @@ const separator = require('path').sep
 const pane = () => <div>Pane</div>
 Module._load = function (name: string, parent: any, ...args: any[]) {
   if (parent?.filename.split(separator).join('/').endsWith('/Layout/ContentView.tsx')) {
-    if (['../Tree', '../ChartPanel', '../Sidebar/PublishTab'].includes(name)) return { __esModule: true, default: pane }
+    if (['../Tree', '../ChartPanel'].includes(name)) return { __esModule: true, default: pane }
     if (name === '../Sidebar') return { Sidebar: pane }
     if (name === 'react-split-pane') return { __esModule: true, default: ({ children }: any) => <div>{children}</div> }
     if (name === './MobileTabs') return { __esModule: true, default: () => <div>Mobile tabs</div> }
