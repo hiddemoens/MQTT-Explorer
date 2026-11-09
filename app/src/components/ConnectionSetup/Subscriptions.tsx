@@ -1,58 +1,52 @@
-import React, { useCallback, useState } from 'react'
+import React from 'react'
 import Delete from '@mui/icons-material/Delete'
-import {
-  IconButton,
-  TableContainer,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  Paper,
-  Theme,
-} from '@mui/material'
+import { IconButton, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Typography } from '@mui/material'
 import { bindActionCreators } from 'redux'
-import { withStyles } from '@mui/styles'
 import { connect } from 'react-redux'
 import { ConnectionOptions } from '../../model/ConnectionOptions'
 import { connectionManagerActions } from '../../actions'
 
-function Subscriptions(props: {
-  classes: any
+function Subscriptions({
+  connection,
+  managerActions,
+}: {
   connection: ConnectionOptions
   managerActions: typeof connectionManagerActions
 }) {
-  const { classes, connection, managerActions } = props
+  if (connection.subscriptions.length === 0) {
+    return <Typography color="text.secondary">No subscriptions added.</Typography>
+  }
 
   return (
-    <TableContainer component={Paper} className={`${classes.topicList} advanced-connection-settings-topic-list`}>
-      <Table size="small">
+    <TableContainer
+      className="advanced-connection-settings-topic-list"
+      sx={{ maxHeight: 200, border: 1, borderColor: 'divider', borderRadius: 1, bgcolor: 'background.default' }}
+    >
+      <Table size="small" stickyHeader aria-label="Subscriptions for this connection">
         <TableHead>
           <TableRow>
-            <TableCell align="left" padding="checkbox" className={classes.tableTitleCell} />
-            <TableCell className={classes.tableTitleCell}>Topic</TableCell>
-            <TableCell align="right" className={classes.tableTitleCell}>
-              QoS
+            <TableCell>Topic filter</TableCell>
+            <TableCell align="right">QoS</TableCell>
+            <TableCell align="right" sx={{ width: 1, whiteSpace: 'nowrap' }}>
+              Remove
             </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {connection.subscriptions.map(subscription => (
             <TableRow key={`${subscription.topic}_qos_${subscription.qos}`}>
-              <TableCell align="right" className={classes.tableCell}>
-                <IconButton
-                  onClick={() => managerActions.deleteSubscription(subscription, connection.id)}
-                  style={{ padding: '6px' }}
-                >
-                  <Delete />
-                </IconButton>
-              </TableCell>
-
-              <TableCell component="th" scope="row" className={classes.tableCell}>
+              <TableCell component="th" scope="row" sx={{ overflowWrap: 'anywhere' }}>
                 {subscription.topic}
               </TableCell>
-              <TableCell align="right" className={classes.tableCell}>
-                {subscription.qos}
+              <TableCell align="right">{subscription.qos}</TableCell>
+              <TableCell align="right">
+                <IconButton
+                  size="small"
+                  aria-label={`Remove subscription ${subscription.topic}`}
+                  onClick={() => managerActions.deleteSubscription(subscription, connection.id)}
+                >
+                  <Delete fontSize="small" />
+                </IconButton>
               </TableCell>
             </TableRow>
           ))}
@@ -66,23 +60,4 @@ const mapDispatchToProps = (dispatch: any) => ({
   managerActions: bindActionCreators(connectionManagerActions, dispatch),
 })
 
-const styles = (theme: Theme) => ({
-  tableCell: {
-    paddingTop: 0,
-    paddingBottom: 0,
-    wordBbreak: 'break-word',
-  },
-  tableTitleCell: {
-    paddingTop: `${theme.spacing(0.5)}px`,
-    paddingBottom: `${theme.spacing(0.5)}px`,
-  },
-  topicList: {
-    height: '196px',
-    overflowY: 'scroll' as const,
-    margin: `${theme.spacing(1)}px ${theme.spacing(1)}px 0 ${theme.spacing(1)}px`,
-    backgroundColor: theme.palette.background.default,
-    width: 'auto',
-  },
-})
-
-export default connect(undefined, mapDispatchToProps)(withStyles(styles)(Subscriptions) as any)
+export default connect(undefined, mapDispatchToProps)(Subscriptions)

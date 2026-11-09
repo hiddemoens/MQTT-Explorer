@@ -147,17 +147,6 @@
       width: 100%;
     }
 
-    .Resizer.horizontal::before {
-      content: '•••';
-      display: inline-block;
-      vertical-align: middle;
-      text-align: center;
-      width: 100%;
-      margin-top: -22px;
-      color: #aaa;
-      opacity: 1;
-    }
-
     .Resizer.horizontal:hover {
       border-top: 5px solid rgba(120, 120, 120, 0.3);
       border-bottom: 5px solid rgba(120, 120, 120, 0.3);
@@ -165,19 +154,28 @@
 
     .Resizer.vertical {
       flex: 0 0 10px;
-      position: relative;
       cursor: col-resize;
       background-color: rgba(128, 128, 128, 0.16);
     }
 
+    .Resizer.horizontal,
+    .Resizer.vertical {
+      position: relative;
+    }
+
+    .Resizer.horizontal::before,
     .Resizer.vertical::before {
       content: '•••';
       position: absolute;
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%) rotate(90deg);
+      transform: translate(-50%, -50%);
       color: #aaa;
       pointer-events: none;
+    }
+
+    .Resizer.vertical::before {
+      transform: translate(-50%, -50%) rotate(90deg);
     }
 
     .Resizer.vertical:hover {

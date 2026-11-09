@@ -1,135 +1,117 @@
-import * as React from 'react'
-import { useState, useCallback, memo } from 'react'
+import React, { useState } from 'react'
 import Add from '@mui/icons-material/Add'
+import ArrowBack from '@mui/icons-material/ArrowBack'
 import Lock from '@mui/icons-material/Lock'
-import Undo from '@mui/icons-material/Undo'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
-import { Theme } from '@mui/material/styles'
-import { withStyles } from '@mui/styles'
-import { Button, Grid, TextField, Tooltip } from '@mui/material'
+import { Box, Button, Divider, Stack, TextField, Typography } from '@mui/material'
 import { QoS } from 'mqtt-explorer-backend/src/DataSource/MqttSource'
 import { connectionManagerActions } from '../../actions'
 import { QosSelect } from '../QosSelect'
 import { ConnectionOptions } from '../../model/ConnectionOptions'
 import Subscriptions from './Subscriptions'
 
-const SubscriptionsAny = Subscriptions as any
-
 interface Props {
   connection: ConnectionOptions
-  classes: any
   managerActions: typeof connectionManagerActions
 }
 
-const ConnectionSettings = memo((props: Props) => {
+function AdvancedConnectionSettings({ connection, managerActions }: Props) {
   const [qos, setQos] = useState<QoS>(0)
   const [topic, setTopic] = useState('')
-  const { classes } = props
 
-  const updateSubscription = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => setTopic(event.target.value),
-    []
-  )
-
-  const handleChange = useCallback(
-    (name: string) => (event: any) => {
-      props.managerActions.updateConnection(props.connection.id, {
-        [name]: event.target.value,
-      })
-    },
-    []
-  )
+  const addSubscription = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!topic) return
+    managerActions.addSubscription({ topic, qos }, connection.id)
+    setTopic('')
+  }
 
   return (
-    <div>
-      <form className={classes.container} noValidate autoComplete="off">
-        <Grid container spacing={3}>
-          <Grid item xs={8} className={classes.gridPadding}>
-            <TextField
-              className={`${classes.fullWidth} advanced-connection-settings-topic-input`}
-              label="Topic"
-              placeholder="example/topic"
-              margin="normal"
-              value={topic}
-              onChange={updateSubscription}
-            />
-          </Grid>
-          <Grid item xs={2} className={classes.gridPadding}>
-            <div className={classes.qos}>
-              <QosSelect label="QoS" selected={qos} onChange={setQos} />
-            </div>
-          </Grid>
-          <Grid item xs={2} className={classes.gridPadding}>
+    <Stack spacing={2} divider={<Divider flexItem />}>
+      <Box component="section" aria-labelledby="connection-subscriptions">
+        <Typography id="connection-subscriptions" component="h3" variant="subtitle1" fontWeight={600}>
+          Subscriptions
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Choose which topics to receive. Use # for all topics or sensors/+ for one level under sensors.
+        </Typography>
+        <Box
+          component="form"
+          onSubmit={addSubscription}
+          sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1, my: 1 }}
+        >
+          <TextField
+            id="subscription-topic-filter"
+            className="advanced-connection-settings-topic-input"
+            label="Topic filter"
+            placeholder="sensors/#"
+            value={topic}
+            onChange={event => setTopic(event.target.value)}
+            sx={{ flex: '1 1 180px' }}
+          />
+          <Stack direction="row" alignItems="center" flexWrap="wrap" gap={1}>
+            <QosSelect label="QoS" selected={qos} onChange={setQos} />
             <Button
-              className={classes.button}
-              color="secondary"
-              onClick={() => props.managerActions.addSubscription({ topic, qos }, props.connection.id)}
+              type="submit"
+              startIcon={<Add />}
               variant="contained"
+              disabled={!topic}
               data-testid="add-subscription-button"
             >
-              <Add /> Add
+              Add subscription
             </Button>
-          </Grid>
-          <Grid item xs={12} style={{ padding: 0 }}>
-            <SubscriptionsAny connection={props.connection} />
-          </Grid>
-          <Grid item xs={7} className={classes.gridPadding}>
-            <TextField
-              className={classes.fullWidth}
-              label="MQTT Client ID"
-              margin="normal"
-              value={props.connection.clientId}
-              onChange={handleChange('clientId')}
-            />
-          </Grid>
-          <Grid item xs={3} className={classes.gridPadding}>
-            <div>
-              <Tooltip title="Manage tls connection certificates" placement="top">
-                <Button
-                  variant="contained"
-                  className={classes.button}
-                  onClick={() => props.managerActions.toggleCertificateSettings()}
-                >
-                  <Lock /> Certificates
-                </Button>
-              </Tooltip>
-            </div>
-          </Grid>
-          <Grid item xs={2} className={classes.gridPadding}>
-            <Button
-              variant="contained"
-              className={classes.button}
-              onClick={props.managerActions.toggleAdvancedSettings}
-              data-testid="back-button"
-            >
-              <Undo /> Back
-            </Button>
-          </Grid>
-        </Grid>
-      </form>
-    </div>
+          </Stack>
+        </Box>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+          QoS controls delivery: 0 at most once, 1 at least once, 2 exactly once.
+        </Typography>
+        <Subscriptions connection={connection} />
+      </Box>
+
+      <Stack component="section" aria-labelledby="connection-client-identity" spacing={1}>
+        <Typography id="connection-client-identity" component="h3" variant="subtitle1" fontWeight={600}>
+          Client identity
+        </Typography>
+        <TextField
+          id="connection-client-id"
+          label="MQTT Client ID"
+          size="small"
+          value={connection.clientId ?? ''}
+          onChange={event => managerActions.updateConnection(connection.id, { clientId: event.target.value })}
+          helperText="Identifies this MQTT client to the broker. Use a unique ID for each active client."
+          sx={{ maxWidth: 420 }}
+        />
+      </Stack>
+
+      <Stack component="section" aria-labelledby="connection-tls-certificates" spacing={1}>
+        <Typography id="connection-tls-certificates" component="h3" variant="subtitle1" fontWeight={600}>
+          TLS certificates
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Configure a custom CA or add a client certificate and key if your broker requires them.
+        </Typography>
+        <Box>
+          <Button variant="outlined" startIcon={<Lock />} onClick={() => managerActions.toggleCertificateSettings()}>
+            Manage certificates
+          </Button>
+        </Box>
+      </Stack>
+
+      <Stack direction="row" alignItems="center" justifyContent="space-between" flexWrap="wrap" gap={1}>
+        <Typography variant="body2" color="text.secondary">
+          Use Save on the connection screen to keep your changes.
+        </Typography>
+        <Button startIcon={<ArrowBack />} onClick={managerActions.toggleAdvancedSettings} data-testid="back-button">
+          Back to connection
+        </Button>
+      </Stack>
+    </Stack>
   )
-})
+}
 
 const mapDispatchToProps = (dispatch: any) => ({
   managerActions: bindActionCreators(connectionManagerActions, dispatch),
 })
 
-const styles = (theme: Theme) => ({
-  fullWidth: {
-    width: '100%',
-  },
-  gridPadding: {
-    padding: '0 12px !important',
-  },
-  button: {
-    marginTop: theme.spacing(3),
-    float: 'right' as const,
-  },
-  qos: {
-    marginTop: theme.spacing(1),
-  },
-})
-
-export default connect(undefined, mapDispatchToProps)(withStyles(styles)(ConnectionSettings) as any)
+export default connect(undefined, mapDispatchToProps)(AdvancedConnectionSettings)

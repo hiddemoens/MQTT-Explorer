@@ -14,7 +14,6 @@ import AdvancedConnectionSettings from './AdvancedConnectionSettings'
 import Certificates from './Certificates'
 
 const ConnectionSettingsAny = ConnectionSettings as any
-const AdvancedConnectionSettingsAny = AdvancedConnectionSettings as any
 const CertificatesAny = Certificates as any
 
 interface Props {
@@ -43,7 +42,7 @@ class ConnectionSetup extends React.PureComponent<Props, {}> {
           <ConnectionSettingsAny connection={connection} />
         </Collapse>
         <Collapse in={showAdvancedSettings && !showCertificateSettings}>
-          <AdvancedConnectionSettingsAny connection={connection} />
+          <AdvancedConnectionSettings connection={connection} />
         </Collapse>
         <Collapse in={showCertificateSettings}>
           <CertificatesAny connection={connection} />
@@ -57,12 +56,17 @@ class ConnectionSetup extends React.PureComponent<Props, {}> {
   }
 
   public render() {
-    const { classes, visible, connection } = this.props
+    const { classes, visible, connection, showAdvancedSettings, showCertificateSettings } = this.props
+    const title = showCertificateSettings
+      ? 'TLS certificates'
+      : showAdvancedSettings
+        ? 'Advanced connection settings'
+        : 'MQTT Connection'
     const mqttConnection = connection && toMqttConnection(connection)
     return (
       <div>
         <Modal open={visible} disableAutoFocus>
-          <Paper className={classes.root}>
+          <Paper className={`${classes.root} ${showAdvancedSettings ? classes.advancedRoot : ''}`}>
             <div className={classes.left}>
               <ProfileList />
             </div>
@@ -71,7 +75,7 @@ class ConnectionSetup extends React.PureComponent<Props, {}> {
                 <div className={classes.toolbarContent}>
                   <div className={classes.desktopTitle}>
                     <Typography className={classes.title} variant="h6" color="inherit">
-                      MQTT Connection
+                      {title}
                     </Typography>
                     <Typography className={classes.connectionUri}>{mqttConnection && mqttConnection.url}</Typography>
                   </div>
@@ -100,7 +104,8 @@ const styles = (theme: Theme) => ({
   },
   desktopTitle: {
     display: 'flex',
-    alignItems: 'center',
+    flexDirection: 'column' as const,
+    minWidth: 0,
     flex: 1,
     // Hide on mobile - connection selector will take its place
     [theme.breakpoints.down('md')]: {
@@ -123,6 +128,10 @@ const styles = (theme: Theme) => ({
       flexDirection: 'column' as const,
     },
   },
+  advancedRoot: {
+    height: 'min(650px, 85vh)',
+    margin: 'max(7.5vh, calc((100vh - 650px) / 2)) auto 0',
+  },
   left: {
     borderRight: `1px solid ${theme.palette.divider}`,
     borderRadius: `${theme.shape.borderRadius}px 0 0 ${theme.shape.borderRadius}px`,
@@ -142,20 +151,20 @@ const styles = (theme: Theme) => ({
     backgroundColor: theme.palette.background.paper,
     padding: theme.spacing(2),
     flex: 10,
-    // Mobile: enable scrolling
+    minWidth: 0,
+    overflowY: 'auto' as const,
+    // Mobile: keep all corners rounded
     [theme.breakpoints.down('md')]: {
       borderRadius: `${theme.shape.borderRadius}px`,
-      overflowY: 'auto' as const,
     },
   },
   connectionUri: {
-    width: '27em',
+    maxWidth: '100%',
     textOverflow: 'ellipsis' as const,
     whiteSpace: 'nowrap' as const,
     overflow: 'hidden' as const,
     color: theme.palette.text.secondary,
     fontSize: '0.9em',
-    marginLeft: theme.spacing(4),
   },
 })
 
