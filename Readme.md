@@ -1,22 +1,37 @@
-# [MQTT Explorer](https://mqtt-explorer.com)
+# MQTT Explorer (system CA fork)
 
-[![Downloads](https://img.shields.io/github/release/thomasnordquist/mqtt-explorer.svg)](https://travis-ci.org/thomasnordquist/MQTT-Explorer/releases)
-[![Downloads](https://img.shields.io/github/downloads/thomasnordquist/mqtt-explorer/total.svg)](https://travis-ci.org/thomasnordquist/MQTT-Explorer/releases)
-[![Build_Status](https://travis-ci.org/thomasnordquist/MQTT-Explorer.svg?branch=master)](https://travis-ci.org/thomasnordquist/MQTT-Explorer)
-[![Build status](https://ci.appveyor.com/api/projects/status/c35tkm29rm4m5364/branch/master?svg=true)](https://ci.appveyor.com/project/thomasnordquist/mqtt-explorer/branch/master)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/47b26e03fce543ceac7914214482334a)](https://app.codacy.com/app/thomasnordquist/MQTT-Explorer?utm_source=github.com&utm_medium=referral&utm_content=thomasnordquist/MQTT-Explorer&utm_campaign=Badge_Grade_Dashboard)
+[![Release](https://img.shields.io/github/v/release/hiddemoens/MQTT-Explorer?include_prereleases)](https://github.com/hiddemoens/MQTT-Explorer/releases)
+[![Downloads](https://img.shields.io/github/downloads/hiddemoens/MQTT-Explorer/total)](https://github.com/hiddemoens/MQTT-Explorer/releases)
+
+Fork of [thomasnordquist/MQTT-Explorer](https://github.com/thomasnordquist/MQTT-Explorer), an MQTT client for exploring topics and messages.
+This fork uses maintained operating system certificate authorities for MQTT TLS connections on Windows, Linux, and macOS, while preserving custom CA overrides and certificate validation.
 
 |                                                                                                                                     |                                                                                                                |                                                                                                                |
 | :---------------------------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------: |
 | [![screen_composite](https://mqtt-explorer.com/img/screen-composite_small.png)](https://mqtt-explorer.com/img/screen-composite.png) | [![screen2_small](https://mqtt-explorer.com/img/screen2_small.png)](https://mqtt-explorer.com/img/screen2.png) | [![screen3_small](https://mqtt-explorer.com/img/screen3_small.png)](https://mqtt-explorer.com/img/screen3.png) |
 
-# The App has moved to [mqtt-explorer.com](https://mqtt-explorer.com)
+## Downloads
 
-MQTT Explorer is a comprehensive and easy-to-use MQTT Client.  
-Downloads can be found at the link above.
+Download desktop builds from [this fork's GitHub Releases](https://github.com/hiddemoens/MQTT-Explorer/releases).
+Current prerelease: [v0.4.0-beta.5-system-ca.1](https://github.com/hiddemoens/MQTT-Explorer/releases/tag/v0.4.0-beta.5-system-ca.1).
 
-This page is dedicated to its development.
-Pull-Requests and error reports are welcome.
+| Platform | Downloads |
+| --- | --- |
+| macOS 12+ — Apple Silicon (M1 and newer) | [DMG](https://github.com/hiddemoens/MQTT-Explorer/releases/download/v0.4.0-beta.5-system-ca.1/MQTT-Explorer-0.4.0-beta.5-system-ca.1-mac-arm64.dmg) · [ZIP](https://github.com/hiddemoens/MQTT-Explorer/releases/download/v0.4.0-beta.5-system-ca.1/MQTT-Explorer-0.4.0-beta.5-system-ca.1-mac-arm64.zip) |
+| macOS 12+ — Intel | [DMG](https://github.com/hiddemoens/MQTT-Explorer/releases/download/v0.4.0-beta.5-system-ca.1/MQTT-Explorer-0.4.0-beta.5-system-ca.1-mac-x64.dmg) · [ZIP](https://github.com/hiddemoens/MQTT-Explorer/releases/download/v0.4.0-beta.5-system-ca.1/MQTT-Explorer-0.4.0-beta.5-system-ca.1-mac-x64.zip) |
+| Windows — x64 | [Installer](https://github.com/hiddemoens/MQTT-Explorer/releases/download/v0.4.0-beta.5-system-ca.1/MQTT-Explorer-0.4.0-beta.5-system-ca.1-windows-x64-setup.exe) · [Portable](https://github.com/hiddemoens/MQTT-Explorer/releases/download/v0.4.0-beta.5-system-ca.1/MQTT-Explorer-0.4.0-beta.5-system-ca.1-windows-x64-portable.exe) |
+| Linux — x64 | [AppImage](https://github.com/hiddemoens/MQTT-Explorer/releases/download/v0.4.0-beta.5-system-ca.1/MQTT-Explorer-0.4.0-beta.5-system-ca.1-linux-x86_64.AppImage) · [tar.gz](https://github.com/hiddemoens/MQTT-Explorer/releases/download/v0.4.0-beta.5-system-ca.1/MQTT-Explorer-0.4.0-beta.5-system-ca.1-linux-x64.tar.gz) |
+
+[SHA-256 checksums](https://github.com/hiddemoens/MQTT-Explorer/releases/download/v0.4.0-beta.5-system-ca.1/SHA256SUMS.txt) accompany downloads. See release notes for verification status.
+
+### Installation and updates
+
+- **macOS:** open DMG and drag MQTT Explorer into Applications, or extract ZIP. Builds are ad hoc signed and not Apple-notarized, so macOS may block first launch.
+- **Windows:** run installer, or use portable executable. Builds are unsigned and may show a SmartScreen warning.
+- **Linux:** make AppImage executable (`chmod +x <downloaded-file>.AppImage`) and run it, or extract tar.gz and run `mqtt-explorer`. Keep distribution `ca-certificates` package installed and updated.
+
+These prerelease packages use manual updates: download a newer build from this fork's Releases page.
+Restart app after operating system certificate updates. Keep **Validate certificate** enabled.
 
 ## Quick Start with GitHub Codespaces
 
@@ -37,7 +52,7 @@ The devcontainer includes a pre-configured MQTT broker and all development tools
 ```bash
 npm install -g yarn
 yarn
-yarn build
+NODE_ENV=production yarn build
 yarn start
 ```
 
@@ -54,11 +69,13 @@ yarn start:server
 
 Then open your browser to `http://localhost:3000`. For more details, see [BROWSER_MODE.md](BROWSER_MODE.md).
 
-### Docker (Browser Mode)
+### Upstream Docker images (Browser Mode)
 
 [![Try in PWD](https://raw.githubusercontent.com/play-with-docker/stacks/master/assets/images/button.png)](https://labs.play-with-docker.com/?stack=https://raw.githubusercontent.com/thomasnordquist/MQTT-Explorer/master/docker-compose.yml)
 
-Run MQTT Explorer in a Docker container:
+The following images are published by upstream and do not include this fork's changes. Fork downloads above are desktop applications.
+
+Run upstream MQTT Explorer in a Docker container:
 
 ```bash
 docker run -d \
@@ -315,3 +332,18 @@ node node_modules/mocha/bin/mocha.js --require tsx "backend/src/DataSource/spec/
 ```
 
 System CA trust workflow runs focused TLS tests and pinned Electron native trust checks on Windows, Linux and macOS, without opening app windows.
+
+## Package desktop downloads
+
+Use Node 24 and Yarn 1.22. Build from this fork's source checkout:
+
+```sh
+yarn install --frozen-lockfile
+NODE_ENV=production yarn build
+node scripts/packageSystemTrust.cjs mac 0.4.0-beta.5-system-ca.1
+node scripts/packageSystemTrust.cjs linux 0.4.0-beta.5-system-ca.1
+node scripts/packageSystemTrust.cjs win 0.4.0-beta.5-system-ca.1
+```
+
+Packages are written to `build/downloads/`. macOS packaging requires macOS and Xcode Command Line Tools; macOS builds include both Apple Silicon and Intel variants. Linux and Windows targets currently use x64.
+Packaging stages runtime files and dependencies separately, excludes upstream signing credentials, uses ad hoc signing on macOS, and disables automatic publishing and in-app updates for these manually distributed prereleases.

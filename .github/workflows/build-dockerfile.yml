@@ -14,6 +14,8 @@ concurrency:
 
 jobs:
   create-image:
+    # Upstream publishing jobs do not run in forks.
+    if: github.repository == 'thomasnordquist/MQTT-Explorer'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

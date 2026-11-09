@@ -28,6 +28,8 @@ concurrency:
 
 jobs:
   build-and-test:
+    # Upstream publishing jobs do not run in forks.
+    if: github.repository == 'thomasnordquist/MQTT-Explorer'
     runs-on: ubuntu-latest
     permissions:
       contents: read
