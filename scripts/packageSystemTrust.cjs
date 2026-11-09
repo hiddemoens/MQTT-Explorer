@@ -9,7 +9,7 @@ async function main() {
   if (!['mac', 'linux', 'win'].includes(platform))
     throw new Error('Usage: node scripts/packageSystemTrust.cjs mac|linux|win [version]')
   const root = path.resolve(__dirname, '..')
-  const version = process.argv[3] || '0.5.0'
+  const version = process.argv[3] || '0.5.1'
   const staging = path.join(root, 'build', 'distribution', platform)
   const output = path.join(root, 'build', 'downloads')
   fs.rmSync(staging, { recursive: true, force: true })
