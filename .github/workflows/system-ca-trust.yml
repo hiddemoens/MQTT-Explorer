@@ -1,0 +1,46 @@
+name: System CA trust
+
+on:
+  push:
+    branches: [codex/system-ca-trust]
+  pull_request:
+    paths:
+      - 'backend/src/DataSource/**'
+      - 'native/**'
+      - 'scripts/*SystemCertificates.cjs'
+      - '.github/workflows/system-ca-trust.yml'
+      - 'package.json'
+      - 'package-lock.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-trust:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install locked backend dependencies
+        run: npm ci --ignore-scripts --legacy-peer-deps --no-audit --no-fund
+      - name: Download pinned Electron runtime
+        run: node node_modules/electron/install.js
+      - name: Build macOS system certificate helper
+        run: npm run build:system-certificates
+      - name: Test native macOS trust policies
+        if: runner.os == 'macOS'
+        run: node scripts/buildSystemCertificates.cjs --test
+      - name: Test trust selection and TLS validation
+        run: node node_modules/mocha/bin/mocha.js --require tsx "backend/src/DataSource/spec/*.spec.ts"
+      - name: Check backend types
+        run: node node_modules/typescript/bin/tsc --noEmit -p backend/tsconfig.json
+      - name: Check native Electron system trust
+        run: npm run test:system-certificates

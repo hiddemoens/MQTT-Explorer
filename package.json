@@ -36,17 +36,19 @@
     "lint:eslint": "eslint --ext .ts,.tsx .",
     "lint:eslint:fix": "eslint --ext .ts,.tsx . --fix",
     "lint:spellcheck": "cspell -e ./build -e \"node_modules\" \"**/*.ts{x,}\"",
-    "build": "tsc && (cd app && yarn run build)",
-    "build:server": "npx tsc && (cd app && npx webpack --config webpack.browser.config.mjs --mode production)",
+    "build": "npm run build:system-certificates && tsc && (cd app && yarn run build)",
+    "build:server": "npm run build:system-certificates && npx tsc && (cd app && npx webpack --config webpack.browser.config.mjs --mode production)",
     "prepare-release": "tsx scripts/prepare-release.ts",
     "package": "tsx package.ts",
     "ui-test": "./scripts/uiTests.sh",
     "upload-video-artifacts": "./scripts/uploadVideoAsset.ts ui-test.mp4 ui-test.gif",
-    "package-with-docker": "./scripts/package-with-docker.sh"
+    "package-with-docker": "./scripts/package-with-docker.sh",
+    "build:system-certificates": "node scripts/buildSystemCertificates.cjs",
+    "test:system-certificates": "node scripts/testSystemCertificates.cjs"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/thomasnordquist/MQTT-Explorer.git"
+    "url": "https://github.com/hiddemoens/MQTT-Explorer.git"
   },
   "resolutions": {
     "@electron/node-gyp": "10.2.0-electron.1"
@@ -62,6 +64,15 @@
       "gatekeeperAssess": false,
       "publish": [
         "github"
+      ],
+      "extraResources": [
+        {
+          "from": "build/system-certificates",
+          "to": "system-certificates"
+        }
+      ],
+      "binaries": [
+        "Contents/Resources/system-certificates"
       ]
     },
     "linux": {

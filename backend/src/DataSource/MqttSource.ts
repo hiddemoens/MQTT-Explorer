@@ -4,6 +4,7 @@ import { type MqttClient, connect as mqttConnect } from 'mqtt'
 import { DataSource, DataSourceStateMachine } from './'
 import { MqttMessage } from '../../../events'
 import { Base64Message } from '../Model/Base64Message'
+import { getCertificateAuthority } from './CertificateAuthority'
 
 export interface MqttOptions {
   url: string
@@ -31,6 +32,8 @@ export class MqttSource implements DataSource<MqttOptions> {
   private messageCallback?: (topic: string, message: Buffer, packet: any) => void
   public topicSeparator = '/'
 
+  constructor(private readonly certificateAuthority = getCertificateAuthority) {}
+
   public onMessage(messageCallback: (topic: string, message: Buffer, packet: any) => void) {
     this.messageCallback = messageCallback
   }
@@ -47,14 +50,24 @@ export class MqttSource implements DataSource<MqttOptions> {
       throw error
     }
 
+    const secure = url.protocol === 'mqtts:' || url.protocol === 'wss:'
+    let ca: Buffer | string[] | undefined
+    try {
+      if (secure) ca = this.certificateAuthority(options.certificateAuthority)
+    } catch (error) {
+      this.stateMachine.setConnected(false)
+      this.stateMachine.setError(error instanceof Error ? error : new Error(String(error)))
+      return this.stateMachine
+    }
+
     const client = mqttConnect(url.toString(), {
       resubscribe: false,
       rejectUnauthorized: options.certValidation,
       username: options.username,
       password: options.password,
       clientId: options.clientId,
-      servername: options.tls ? url.hostname : undefined,
-      ca: options.certificateAuthority ? Buffer.from(options.certificateAuthority, 'base64') : undefined,
+      servername: secure ? url.hostname : undefined,
+      ca,
       cert: options.clientCertificate ? Buffer.from(options.clientCertificate, 'base64') : undefined,
       key: options.clientKey ? Buffer.from(options.clientKey, 'base64') : undefined,
     } as any)

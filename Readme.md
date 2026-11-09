@@ -284,3 +284,34 @@ The readme will be generated from the docs.
 **Special requirement:** When distributing, the attribution and donation page may not be altered or made less accessible without explicit approval.
 
 The license allows for anyone to adapt, share, and redistribute the material, as long as they give appropriate credit and distribute any derivative works under the same license.
+
+## System certificate trust (this fork)
+
+MQTT TLS and secure WebSocket connections use operating system CA certificates by default.
+No CA download, Homebrew package, or manual bundle import is needed:
+
+- **Windows:** Node reads Windows certificate stores.
+- **macOS:** a packaged Security.framework helper reads Apple trust anchors and configured user/admin trust settings. This includes public system roots that Electron 39 / Node 22 omits from its system CA enumeration. Explicit SSL denials are excluded; scoped grants are not expanded to unrestricted trust, and scoped denials are conservatively excluded for all connections.
+- **Linux:** Node reads system CA files/directories. Install distribution `ca-certificates` package and keep OS updates current. Confined packages/containers need access to their system trust store; host store visibility depends on packaging.
+
+System certificates are cached for process lifetime. **Restart MQTT Explorer after certificate/trust changes.**
+A custom Server Certificate (CA) replaces system authorities for that broker only; client certificate/key settings remain independent.
+Keep **Validate certificate** enabled: chain and hostname validation remain active.
+An unavailable or empty system store produces a connection error instead of falling back to bundled Mozilla roots.
+This selects OS authorities for Node TLS; it does not reproduce every native verification policy, including revocation checks.
+Other HTTP clients in the application retain upstream trust behavior.
+
+### Building and checking system trust
+
+Use pinned Electron 39 or a compatible Node runtime exposing `tls.getCACertificates` (Node 22.15+).
+On macOS, building needs Xcode Command Line Tools; end users need no compiler.
+`npm run build` builds a universal macOS certificate helper and includes it in macOS package resources.
+For backend development, run commands from repository root and build helper first:
+
+```sh
+npm run build:system-certificates
+npm run test:system-certificates
+node node_modules/mocha/bin/mocha.js --require tsx "backend/src/DataSource/spec/*.spec.ts"
+```
+
+System CA trust workflow runs focused TLS tests and pinned Electron native trust checks on Windows, Linux and macOS, without opening app windows.
