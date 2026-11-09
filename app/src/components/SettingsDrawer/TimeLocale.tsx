@@ -1,8 +1,8 @@
 import * as React from 'react'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
-import { Input, InputLabel, MenuItem, Select, Theme } from '@mui/material'
-import { withStyles } from '@mui/styles'
+import { Autocomplete, Box, TextField, Typography } from '@mui/material'
+import moment from 'moment'
 import { settingsActions } from '../../actions'
 import { AppState } from '../../reducers'
 import DateFormatter from '../helper/DateFormatter'
@@ -13,53 +13,89 @@ function importAll(r: any) {
 // @ts-expect-error -- webpack require
 importAll(require.context('moment/locale', true, /\.js$/))
 
-const moment = require('moment')
+interface FormatOption {
+  locale: string
+  label: string
+  numberExample: string
+}
+
+const exampleDate = new Date(2025, 10, 23, 16, 5, 9, 123)
+const exampleNumber = 1234.56
+
+function numberExample(locale: string) {
+  try {
+    return new Intl.NumberFormat(locale || undefined, { useGrouping: false }).format(exampleNumber)
+  } catch {
+    return new Intl.NumberFormat(undefined, { useGrouping: false }).format(exampleNumber)
+  }
+}
+
+const formats: FormatOption[] = moment
+  .locales()
+  .sort((a, b) => a.localeCompare(b, 'en'))
+  .map(locale => ({ locale, label: locale, numberExample: numberExample(locale) }))
 
 interface Props {
   actions: {
     settings: typeof settingsActions
   }
   timeLocale: string
-  classes: any
 }
 
-function TimeLocaleSettings(props: Props) {
-  const { classes, timeLocale, actions } = props
-  const locales = moment.locales()
-  const date = new Date()
-  const localeMenuItems = locales.map((l: string) => (
-    <MenuItem key={l} value={l}>
-      <div>
-        Locale: <b>{l}</b>, Format:{' '}
-        <b>
-          <DateFormatter date={date} overrideLocale={l} />
-        </b>
-      </div>
-    </MenuItem>
-  ))
-
-  function updateLocale(e: any) {
-    const locale = e.target.value ? String(e.target.value) : ''
-    actions.settings.setTimeLocale(locale)
+function TimeLocaleSettings({ timeLocale, actions }: Props) {
+  const locale = timeLocale.toLowerCase()
+  const existing = formats.find(option => option.locale === locale)
+  const selected = existing || {
+    locale: timeLocale,
+    label: timeLocale || 'System default',
+    numberExample: numberExample(timeLocale),
   }
+  const options = existing ? formats : [selected, ...formats]
 
   return (
-    <div style={{ padding: '8px', display: 'flex' }}>
-      <InputLabel htmlFor="time-locale" style={{ flex: '1', marginTop: '8px' }}>
-        Time Locale
-      </InputLabel>
-      <Select
-        value={timeLocale}
-        onChange={updateLocale}
-        input={<Input name="time-locale" id="time-locale-label-placeholder" />}
-        name="time-locale"
-        className={classes.input}
-        renderValue={v => <span>{String(v)}</span>}
-        style={{ flex: '1' }}
-      >
-        {localeMenuItems}
-      </Select>
-    </div>
+    <Box sx={{ px: 1, py: 1.5 }}>
+      <Autocomplete
+        id="time-locale"
+        size="small"
+        fullWidth
+        disableClearable
+        options={options}
+        value={selected}
+        isOptionEqualToValue={(option, value) => option.locale === value.locale}
+        getOptionLabel={option => option.label}
+        getOptionKey={option => option.locale}
+        onChange={(_, option) => actions.settings.setTimeLocale(option.locale)}
+        renderInput={params => (
+          <TextField
+            {...params}
+            label="Format"
+            helperText={
+              <>
+                <DateFormatter date={exampleDate} /> · {selected.numberExample}
+              </>
+            }
+          />
+        )}
+        renderOption={(props, option) => {
+          const { key, ...liProps } = props
+          return (
+            <li key={key} {...liProps}>
+              <Box component="span" sx={{ display: 'grid', gridTemplateColumns: '5.5rem minmax(0, 1fr)', gap: 1 }}>
+                <Typography component="span" variant="body2" sx={{ fontWeight: 'bold', overflowWrap: 'anywhere' }}>
+                  {option.label}
+                </Typography>
+                <Typography component="span" variant="body2" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                  <DateFormatter date={exampleDate} overrideLocale={option.locale} />
+                  <Typography component="span" variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                    {option.numberExample}
+                  </Typography>
+                </Typography>
+              </Box>
+            </li>
+          )
+        }}
+      />
+    </Box>
   )
 }
 
@@ -73,16 +109,4 @@ const mapDispatchToProps = (dispatch: any) => ({
   },
 })
 
-const styles = (theme: Theme) => ({
-  input: {
-    minWidth: '150px',
-    margin: `auto ${theme.spacing(1)} auto ${theme.spacing(2)}px`,
-  },
-  selected: {
-    '& div': {
-      display: 'none',
-    },
-  },
-})
-
-export default withStyles(styles)(connect(mapStateToProps, mapDispatchToProps)(TimeLocaleSettings))
+export default connect(mapStateToProps, mapDispatchToProps)(TimeLocaleSettings)

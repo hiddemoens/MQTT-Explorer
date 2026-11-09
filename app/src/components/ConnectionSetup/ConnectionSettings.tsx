@@ -6,9 +6,8 @@ import Visibility from '@mui/icons-material/Visibility'
 import VisibilityOff from '@mui/icons-material/VisibilityOff'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
-import { Theme } from '@mui/material/styles'
 import { withStyles } from '@mui/styles'
-import { Button, Grid, IconButton, InputAdornment, MenuItem, TextField, Tooltip } from '@mui/material'
+import { Box, Button, Grid, IconButton, InputAdornment, MenuItem, TextField, Tooltip } from '@mui/material'
 import { AppState } from '../../reducers'
 import { connectionActions, connectionManagerActions, globalActions } from '../../actions'
 import { ConnectionOptions, toMqttConnection } from '../../model/ConnectionOptions'
@@ -28,6 +27,7 @@ interface Props {
 }
 
 const protocols = ['mqtt', 'ws']
+const actionGroup = { display: 'flex', flexWrap: 'wrap', gap: 1 } as const
 
 function ConnectionSettings(props: Props) {
   const [showPassword, setShowPassword] = useState(false)
@@ -265,31 +265,23 @@ function ConnectionSettings(props: Props) {
           </Grid>
         </Grid>
       </form>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
+      <Box
+        sx={{
+          ...actionGroup,
           alignItems: 'center',
           paddingTop: '16px',
           borderTop: '1px solid rgba(0, 0, 0, 0.12)',
         }}
       >
-        <div>
+        <Box sx={actionGroup}>
           <Tooltip title="Delete this connection permanently" arrow>
-            <Button
-              variant="contained"
-              color="error"
-              className={classes.button}
-              onClick={handleDelete}
-              aria-label="Delete connection"
-            >
+            <Button variant="contained" color="error" onClick={handleDelete} aria-label="Delete connection">
               <Delete /> Delete
             </Button>
           </Tooltip>
           <Tooltip title="Advanced connection settings" arrow>
             <Button
               variant="contained"
-              className={classes.button}
               onClick={props.managerActions.toggleAdvancedSettings}
               data-testid="advanced-button"
               aria-label="Show advanced settings"
@@ -297,22 +289,21 @@ function ConnectionSettings(props: Props) {
               <Settings /> Advanced
             </Button>
           </Tooltip>
-        </div>
-        <div>
+        </Box>
+        <Box sx={{ ...actionGroup, marginLeft: 'auto' }}>
           <Tooltip title="Save connection settings" arrow>
             <Button
               variant="contained"
               color="secondary"
-              className={classes.button}
               onClick={props.managerActions.saveConnectionSettings}
               aria-label="Save connection"
             >
               <Save /> Save
             </Button>
           </Tooltip>
-          <ConnectButton toggle={toggleConnect} connecting={props.connecting} classes={classes} />
-        </div>
-      </div>
+          <ConnectButton toggle={toggleConnect} connecting={props.connecting} />
+        </Box>
+      </Box>
     </div>
   )
 }
@@ -328,15 +319,12 @@ const mapDispatchToProps = (dispatch: any) => ({
   globalActions: bindActionCreators(globalActions, dispatch),
 })
 
-const styles = (theme: Theme) => ({
+const styles = () => ({
   textField: {
     width: '100%',
   },
   switch: {
     marginTop: 0,
-  },
-  button: {
-    margin: theme.spacing(1),
   },
   inputFormControl: {
     marginTop: '16px',
