@@ -17,10 +17,10 @@ const DeleteSelectedTopicButton = (props: {
           size="small"
           color="secondary"
           variant="contained"
-          style={{ marginTop: '11px', padding: '0px 4px', minHeight: '24px' }}
+          style={{ margin: 0, padding: '0px 4px', minHeight: '20px', minWidth: 0, fontSize: '11px', lineHeight: 1 }}
           onClick={props.actions.sidebar.clearRetainedTopic}
         >
-          retained <Clear style={{ fontSize: '16px', marginLeft: '2px' }} />
+          retained <Clear style={{ fontSize: '12px', marginLeft: '2px' }} />
         </Button>
       </Tooltip>
     ),

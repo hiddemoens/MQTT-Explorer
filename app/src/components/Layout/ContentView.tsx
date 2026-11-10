@@ -26,7 +26,7 @@ interface Props {
 function ContentView(props: Props) {
   const [isNarrow, setIsNarrow] = React.useState(() => typeof window !== 'undefined' && window.innerWidth <= 768)
   const isMobile = isNarrow && !props.forceDesktopLayout
-  const [mobileTab, setMobileTab] = React.useState(0) // 0 = topics, 1 = details and publish, 2 = charts
+  const [mobileTab, setMobileTab] = React.useState(0) // 0 = topics, 1 = details, 2 = publish, 3 = charts
   const [height, setHeight] = React.useState<string | number>('100%')
   const [sidebarWidth, setSidebarWidth] = React.useState<string | number>('40%')
   const [detectedHeight, setDetectedHeight] = React.useState(0)
@@ -94,7 +94,7 @@ function ContentView(props: Props) {
     const target = window as any
     target.switchToDetailsTab = () => setMobileTab(1)
     target.switchToTopicsTab = () => setMobileTab(0)
-    target.switchToChartsTab = () => setMobileTab(2)
+    target.switchToChartsTab = () => setMobileTab(3)
     return () => {
       delete target.switchToDetailsTab
       delete target.switchToTopicsTab
@@ -183,21 +183,30 @@ function ContentView(props: Props) {
           >
             {topics}
           </div>
-          {/* Details and Publish - keep mounted, toggle visibility */}
+          {/* Details tab - keep mounted, toggle visibility */}
           <div
             role="tabpanel"
             id="mobile-tabpanel-1"
             aria-labelledby="mobile-tab-1"
             style={{ ...sidebarContainerStyle, display: mobileTab === 1 ? 'block' : 'none' }}
           >
-            <Sidebar connectionId={props.connectionId} />
+            <Sidebar section="details" connectionId={props.connectionId} />
           </div>
-          {/* Charts tab - keep mounted, toggle visibility */}
+          {/* Publish tab - keep mounted to preserve drafts */}
           <div
             role="tabpanel"
             id="mobile-tabpanel-2"
             aria-labelledby="mobile-tab-2"
             style={{ ...sidebarContainerStyle, display: mobileTab === 2 ? 'block' : 'none' }}
+          >
+            <Sidebar section="publish" connectionId={props.connectionId} />
+          </div>
+          {/* Charts tab - keep mounted, toggle visibility */}
+          <div
+            role="tabpanel"
+            id="mobile-tabpanel-3"
+            aria-labelledby="mobile-tab-3"
+            style={{ ...sidebarContainerStyle, display: mobileTab === 3 ? 'block' : 'none' }}
           >
             <ChartPanel />
           </div>

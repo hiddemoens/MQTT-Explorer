@@ -1,6 +1,7 @@
 import * as React from 'react'
 import CloudOff from '@mui/icons-material/CloudOff'
 import Logout from '@mui/icons-material/Logout'
+import Info from '@mui/icons-material/Info'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 import { shell } from 'electron'
@@ -10,7 +11,7 @@ import { Button, Drawer, Typography, Tooltip } from '@mui/material'
 import TimeLocale from './TimeLocale'
 import SettingsDropdown from './SettingsDropdown'
 import { AppState } from '../../reducers'
-import { settingsActions, connectionActions } from '../../actions'
+import { settingsActions, connectionActions, globalActions } from '../../actions'
 import { TopicOrder } from '../../reducers/Settings'
 import { isBrowserMode } from '../../utils/browserMode'
 import { useAuth } from '../../contexts/AuthContext'
@@ -61,9 +62,15 @@ const styles = (theme: Theme) => ({
     fontWeight: 600,
   },
   author: {
-    margin: 'auto 8px 8px auto',
+    margin: '8px 8px 8px auto',
     color: theme.palette.text.secondary,
     cursor: 'pointer' as const,
+  },
+  footer: {
+    marginTop: 'auto',
+    padding: theme.spacing(1),
+    display: 'flex',
+    flexDirection: 'column' as const,
   },
   mobileButtons: {
     padding: theme.spacing(1),
@@ -84,6 +91,7 @@ interface Props {
   actions: {
     settings: typeof settingsActions
     connection: typeof connectionActions
+    global: typeof globalActions
   }
   autoExpandLimit: number
   classes: any
@@ -224,12 +232,23 @@ class Settings extends React.PureComponent<Props, {}> {
             data-testid="force-desktop-layout-toggle"
           />
         </div>
-        <Tooltip placement="top" title="App Author">
-          <Typography className={classes.author} onClick={this.openGithubPage}>
-            by Thomas Nordquist
-          </Typography>
-        </Tooltip>
-        <BrokerStatistics />
+        <div className={classes.footer}>
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<Info />}
+            onClick={() => actions.global.toggleAboutDialogVisibility()}
+            fullWidth
+          >
+            About MQTT Explorer
+          </Button>
+          <Tooltip placement="top" title="App Author">
+            <Typography className={classes.author} onClick={this.openGithubPage}>
+              by Thomas Nordquist
+            </Typography>
+          </Tooltip>
+          <BrokerStatistics />
+        </div>
       </Drawer>
     )
   }
@@ -295,6 +314,7 @@ const mapDispatchToProps = (dispatch: any) => ({
   actions: {
     settings: bindActionCreators(settingsActions, dispatch),
     connection: bindActionCreators(connectionActions, dispatch),
+    global: bindActionCreators(globalActions, dispatch),
   },
 })
 

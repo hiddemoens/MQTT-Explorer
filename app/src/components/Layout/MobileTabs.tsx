@@ -4,6 +4,7 @@ import { Theme } from '@mui/material/styles'
 import { withStyles } from '@mui/styles'
 import AccountTreeIcon from '@mui/icons-material/AccountTree'
 import InfoIcon from '@mui/icons-material/Info'
+import PublishIcon from '@mui/icons-material/Publish'
 import ShowChartIcon from '@mui/icons-material/ShowChart'
 
 interface Props {
@@ -25,7 +26,7 @@ function MobileTabs(props: Props) {
         variant="fullWidth"
         indicatorColor="primary"
         textColor="primary"
-        aria-label="Topics, Details and Charts tabs"
+        aria-label="Topics, Details, Publish and Charts tabs"
       >
         <Tab
           icon={<AccountTreeIcon />}
@@ -39,17 +40,25 @@ function MobileTabs(props: Props) {
           icon={<InfoIcon />}
           label="Details"
           data-testid="mobile-tab-details"
-          aria-label="View topic details and publish"
+          aria-label="View topic details"
           id="mobile-tab-1"
           aria-controls="mobile-tabpanel-1"
+        />
+        <Tab
+          icon={<PublishIcon />}
+          label="Publish"
+          data-testid="mobile-tab-publish"
+          aria-label="Publish a message"
+          id="mobile-tab-2"
+          aria-controls="mobile-tabpanel-2"
         />
         <Tab
           icon={<ShowChartIcon />}
           label="Charts"
           data-testid="mobile-tab-charts"
           aria-label="View charts"
-          id="mobile-tab-2"
-          aria-controls="mobile-tabpanel-2"
+          id="mobile-tab-3"
+          aria-controls="mobile-tabpanel-3"
         />
       </Tabs>
     </Box>
@@ -64,10 +73,11 @@ const styles = (theme: Theme) => ({
     zIndex: 1,
     minHeight: '56px', // Touch-friendly tab height
     '& .MuiTab-root': {
+      minWidth: 0,
       minHeight: '56px', // 48px minimum + padding
       fontSize: '16px', // Prevent iOS zoom
       fontWeight: 500,
-      padding: theme.spacing(1.5, 2),
+      padding: theme.spacing(1.5, 0.5),
       textTransform: 'none' as const, // Better readability
       '&:active': {
         opacity: 0.7, // Touch feedback

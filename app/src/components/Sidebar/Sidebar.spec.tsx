@@ -28,6 +28,37 @@ try {
 describe('Stacked sidebar sections', () => {
   afterEach(cleanup)
 
+  function renderSection(section: 'details' | 'publish') {
+    const theme = themes.darkTheme
+    return render(
+      <ThemeProvider theme={theme}>
+        <LegacyThemeProvider theme={theme}>
+          <Sidebar section={section} />
+        </LegacyThemeProvider>
+      </ThemeProvider>
+    )
+  }
+
+  it('shows only topic details when used in mobile Details tab', () => {
+    const view = renderSection('details')
+    expect(view.queryByText('Topic details')).not.to.equal(null)
+    expect(view.queryByText('Publish editor')).to.equal(null)
+    expect(view.queryByRole('button', { name: 'Details' })).to.equal(null)
+  })
+
+  it('shows only publish editor when used in mobile Publish tab', () => {
+    const view = renderSection('publish')
+    expect(view.queryByText('Publish editor')).not.to.equal(null)
+    expect(view.queryByText('Topic details')).to.equal(null)
+    expect(view.queryByRole('button', { name: 'Publish' })).to.equal(null)
+  })
+
+  it('keeps mobile Publish topic spacing above general sidebar padding', () => {
+    const view = renderSection('publish')
+    const sidebar = view.container.querySelector('#Sidebar-publish')!
+    expect(parseFloat(window.getComputedStyle(sidebar).paddingTop)).to.be.greaterThan(16)
+  })
+
   it('shows Details above Publish and collapses each independently', () => {
     const theme = themes.darkTheme
     const view = render(

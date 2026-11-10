@@ -10,12 +10,12 @@ const gutterBaseStyle = {}
 
 const additionStyle = {
   ...gutterBaseStyle,
-  backgroundColor: 'rgba(10, 255, 10, 0.3)',
+  backgroundColor: 'rgba(46, 160, 67, 0.18)',
 }
 
 const deletionStyle = {
   ...gutterBaseStyle,
-  backgroundColor: 'rgba(255, 10, 10, 0.3)',
+  backgroundColor: 'rgba(248, 81, 73, 0.18)',
 }
 
 export function lineChangeStyle(change: Diff.Change) {

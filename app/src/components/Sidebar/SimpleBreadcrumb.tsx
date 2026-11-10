@@ -53,10 +53,8 @@ function SimpleBreadcrumb(props: Props) {
 
 const styles = (theme: Theme) => ({
   breadcrumbContainer: {
-    display: 'flex',
-    flexWrap: 'wrap' as const,
-    alignItems: 'center',
-    gap: 0,
+    minWidth: 0,
+    overflowWrap: 'anywhere' as const,
   },
   breadcrumbLink: {
     fontSize: '1rem',
@@ -68,6 +66,8 @@ const styles = (theme: Theme) => ({
     background: 'none',
     padding: 0,
     lineHeight: 1.5,
+    display: 'inline',
+    overflowWrap: 'anywhere' as const,
     '&:hover': {
       color: theme.palette.primary.main,
     },

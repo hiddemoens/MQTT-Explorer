@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react'
 import { connect } from 'react-redux'
-import { Fade } from '@mui/material'
 import { Decoder } from '../../../../../backend/src/Model/Decoder'
 import * as q from '../../../../../backend/src/Model'
 import CodeDiff from '../CodeDiff'
@@ -24,7 +23,8 @@ function renderDiff(
   current: string = '',
   previous: string = '',
   title?: string,
-  language?: Language
+  language?: Language,
+  wrapLines = false
 ) {
   return (
     <CodeDiff
@@ -33,6 +33,7 @@ function renderDiff(
       current={current}
       title={title}
       language={language}
+      wrapLines={wrapLines}
       nameOfCompareMessage={compareWithPreviousMessage ? 'selected' : 'previous'}
     />
   )
@@ -48,39 +49,27 @@ function renderDiffMode(
 ) {
   const language = currentType === compareType && compareType === 'json' ? 'json' : undefined
 
-  return <div>{renderDiff(treeNode, compareWithPreviousMessage, currentStr, compareStr, undefined, language)}</div>
+  return (
+    <div>{renderDiff(treeNode, compareWithPreviousMessage, currentStr, compareStr, undefined, language, true)}</div>
+  )
 }
 
 function renderRawMode(
   treeNode: q.TreeNode<TopicViewModel>,
   currentStr: string | undefined,
-  compareStr: string | undefined,
-  currentType: Language | undefined,
-  compareType: Language | undefined,
-  compareWithPreviousMessage: boolean
+  currentType: Language | undefined
 ) {
-  return (
-    <div>
-      {renderDiff(treeNode, compareWithPreviousMessage, currentStr, currentStr, undefined, currentType)}
-      <Fade in={Boolean(compareStr)} timeout={400}>
-        <div>
-          {compareStr
-            ? renderDiff(treeNode, compareWithPreviousMessage, compareStr, compareStr, 'selected', compareType)
-            : null}
-        </div>
-      </Fade>
-    </div>
-  )
+  return renderDiff(treeNode, false, currentStr, currentStr, undefined, currentType, true)
 }
 
-export const ValueRenderer: React.FC<Props> = ({ treeNode, compareWith: compare, message, renderMode }) => {
+export const ValueRenderer: React.FC<Props> = ({ treeNode, message, renderMode }) => {
   const decodeMessage = useDecoder(treeNode)
   const decodedMessage = useMemo(() => decodeMessage(message), [decodeMessage, message])
 
   const previousMessages = treeNode.messageHistory.toArray()
   const previousMessage = previousMessages[previousMessages.length - 2]
-  const compareMessage = compare || previousMessage || message
-  const compareWithPreviousMessage = !!compare
+  const compareMessage = previousMessage || message
+  const compareWithPreviousMessage = false
 
   const [currentStr, currentType] = useMemo(
     () => decodedMessage?.message?.format(treeNode.type) ?? [],
@@ -108,7 +97,7 @@ export const ValueRenderer: React.FC<Props> = ({ treeNode, compareWith: compare,
       case 'diff':
         return renderDiffMode(treeNode, currentStr, compareStr, currentType, compareType, compareWithPreviousMessage)
       default:
-        return renderRawMode(treeNode, currentStr, compareStr, currentType, compareType, compareWithPreviousMessage)
+        return renderRawMode(treeNode, currentStr, currentType)
     }
   }
 

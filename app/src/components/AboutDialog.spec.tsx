@@ -1,7 +1,34 @@
+import 'jsdom-global/register'
+import React from 'react'
 import { expect } from 'chai'
 import 'mocha'
 import * as fs from 'fs'
 import * as path from 'path'
+import { cleanup, fireEvent, render } from '@testing-library/react'
+import { Provider } from 'react-redux'
+import { applyMiddleware, combineReducers, createStore } from 'redux'
+import { thunk } from 'redux-thunk'
+import { ThemeProvider } from '@mui/material/styles'
+import { ThemeProvider as LegacyThemeProvider } from '@mui/styles'
+import { themes } from '../theme'
+import { globalState, ActionTypes as GlobalActionTypes } from '../reducers/Global'
+import { settingsReducer } from '../reducers/Settings'
+
+// Locale module discovery uses webpack's require.context; it is unrelated to About navigation.
+const Module = require('module')
+const load = Module._load
+Module._load = function (name: string, parent: any, ...args: any[]) {
+  if (parent?.filename.endsWith('/SettingsDrawer/Settings.tsx') && name === './TimeLocale') {
+    return { __esModule: true, default: () => null }
+  }
+  return load.call(this, name, parent, ...args)
+}
+let Settings: any
+try {
+  Settings = require('./SettingsDrawer/Settings').default
+} finally {
+  Module._load = load
+}
 
 /**
  * AboutDialog License Compliance Tests
@@ -98,36 +125,25 @@ describe('AboutDialog License Compliance', () => {
  * These tests verify that the About dialog is accessible and functional.
  */
 describe('AboutDialog Accessibility', () => {
-  const detailsTabPath = path.join(__dirname, 'Sidebar', 'DetailsTab.tsx')
-  const appPath = path.join(__dirname, 'App.tsx')
+  afterEach(cleanup)
 
-  it('should be accessible from the DetailsTab component', () => {
-    const detailsTabContent = fs.readFileSync(detailsTabPath, 'utf-8')
-
-    // Verify the About button exists in DetailsTab
-    expect(detailsTabContent).to.include('About')
-
-    // Verify it triggers the toggle action
-    expect(detailsTabContent).to.include('toggleAboutDialogVisibility')
-  })
-
-  it('should be integrated in the App component', () => {
-    const appContent = fs.readFileSync(appPath, 'utf-8')
-
-    // Verify AboutDialog is imported
-    expect(appContent).to.include('AboutDialog')
-
-    // Verify it's rendered with state
-    expect(appContent).to.include('aboutDialogVisible')
-  })
-
-  it('should have About button with Info icon in DetailsTab', () => {
-    const detailsTabContent = fs.readFileSync(detailsTabPath, 'utf-8')
-
-    // Verify the button text
-    expect(detailsTabContent).to.include('About MQTT Explorer')
-
-    // Verify Info icon is used
-    expect(detailsTabContent).to.match(/import.*Info.*from.*@mui\/icons-material/)
+  it('opens About from Settings', () => {
+    const store = createStore(
+      combineReducers({ settings: settingsReducer, globalState, connection: () => ({}) }),
+      applyMiddleware(thunk)
+    )
+    store.dispatch({ type: GlobalActionTypes.toggleSettingsVisibility })
+    const view = render(
+      <Provider store={store}>
+        <ThemeProvider theme={themes.darkTheme}>
+          <LegacyThemeProvider theme={themes.darkTheme}>
+            <Settings />
+          </LegacyThemeProvider>
+        </ThemeProvider>
+      </Provider>
+    )
+    expect(store.getState().globalState.get('aboutDialogVisible')).to.equal(false)
+    fireEvent.click(view.getByRole('button', { name: 'About MQTT Explorer' }))
+    expect(store.getState().globalState.get('aboutDialogVisible')).to.equal(true)
   })
 })

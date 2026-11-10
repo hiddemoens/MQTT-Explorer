@@ -15,6 +15,7 @@ interface Props {
   classes: any
   className: string
   treeNode: q.TreeNode<any>
+  inline?: boolean
 }
 
 const style = (theme: Theme) => {
@@ -45,6 +46,24 @@ const style = (theme: Theme) => {
       height: '16px',
       width: '100%',
     },
+    wrappedGutterLine: {
+      display: 'flex',
+      alignItems: 'flex-start',
+      justifyContent: 'flex-end',
+      height: 'auto',
+      minHeight: '20px',
+      paddingRight: 0,
+      boxSizing: 'border-box' as const,
+      gap: '2px',
+    },
+    marker: {
+      display: 'inline-block',
+      width: '12px',
+      lineHeight: '20px',
+      textAlign: 'center' as const,
+      fontWeight: 600,
+      flexShrink: 0,
+    },
   }
 }
 
@@ -62,10 +81,27 @@ function tokensForLine(change: diff.Change, line: number, props: Props) {
   ) : null
 
   if (change.added) {
-    return [chartPreview, <Add key="add" className={classes.icon} />]
+    return [
+      chartPreview,
+      props.inline ? (
+        <span key="add" role="img" aria-label="Added line" className={classes.marker}>
+          +
+        </span>
+      ) : (
+        <Add key="add" className={classes.icon} />
+      ),
+    ]
   }
   if (change.removed) {
-    return [<Remove key="remove" className={classes.icon} />]
+    return [
+      props.inline ? (
+        <span key="remove" role="img" aria-label="Removed line" className={classes.marker}>
+          −
+        </span>
+      ) : (
+        <Remove key="remove" className={classes.icon} />
+      ),
+    ]
   }
   return [
     chartPreview,
@@ -86,13 +122,21 @@ function Gutters(props: Props) {
         .map((_, idx) => {
           currentLine = !change.removed ? currentLine + 1 : currentLine
           return (
-            <div key={`${key}-${idx}`} style={lineChangeStyle(change)} className={props.classes.gutterLine}>
+            <div
+              key={`${key}-${idx}`}
+              style={props.inline ? undefined : lineChangeStyle(change)}
+              className={`${props.classes.gutterLine} ${props.inline ? props.classes.wrappedGutterLine : ''}`}
+            >
               {tokensForLine(change, currentLine, props)}
             </div>
           )
         })
     )
     .reduce((a, b) => a.concat(b), [])
+
+  if (props.inline) {
+    return <span className={props.className}>{gutters}</span>
+  }
 
   return (
     <span>

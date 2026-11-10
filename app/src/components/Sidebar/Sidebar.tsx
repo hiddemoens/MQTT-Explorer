@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { connect } from 'react-redux'
 import { Theme } from '@mui/material/styles'
 import { withStyles } from '@mui/styles'
@@ -17,15 +17,17 @@ interface Props {
   tree?: q.Tree<TopicViewModel>
   classes: any
   connectionId?: string
+  section?: 'details' | 'publish'
 }
 
 function useUpdateNodeWhenNodeReceivesUpdates(node?: q.TreeNode<any>) {
-  const [, setLastUpdate] = useState(0)
-  const updateNode = useCallback(
-    throttle(() => {
-      setLastUpdate(node ? node.lastUpdate : 0)
-    }, 300),
-    [node]
+  const [lastUpdate, setLastUpdate] = useState(0)
+  const updateNode = useMemo(
+    () =>
+      throttle(() => {
+        setLastUpdate(update => update + 1)
+      }, 300),
+    []
   )
 
   useEffect(() => {
@@ -36,19 +38,38 @@ function useUpdateNodeWhenNodeReceivesUpdates(node?: q.TreeNode<any>) {
     return function cleanup() {
       node && node.onMerge.unsubscribe(updateCallback)
       node && node.onMessage.unsubscribe(updateCallback)
+      updateCallback.cancel()
     }
-  }, [node])
+  }, [node, updateNode])
+
+  return lastUpdate
 }
 
 function Sidebar(props: Props) {
   const { classes, tree, nodePath } = props
   const node = usePollingToFetchTreeNode(tree, nodePath || '')
-  useUpdateNodeWhenNodeReceivesUpdates(node)
+  const lastUpdate = useUpdateNodeWhenNodeReceivesUpdates(node)
+
+  if (props.section) {
+    return (
+      <div
+        id={`Sidebar-${props.section}`}
+        className={`${classes.root} ${props.section === 'publish' ? classes.publishSection : ''}`}
+      >
+        {props.section === 'details' ? (
+          <DetailsTab node={node} lastUpdate={lastUpdate} connectionId={props.connectionId} />
+        ) : (
+          <PublishTab connectionId={props.connectionId} />
+        )}
+      </div>
+    )
+  }
+
   return (
     <div id="Sidebar" className={classes.root}>
       <Panel>
         <span>Details</span>
-        <DetailsTab node={node} connectionId={props.connectionId} />
+        <DetailsTab node={node} lastUpdate={lastUpdate} connectionId={props.connectionId} />
       </Panel>
       <Panel>
         <span>Publish</span>
@@ -71,6 +92,9 @@ const styles = (theme: Theme) => ({
     width: '100%',
     boxSizing: 'border-box' as const,
     padding: theme.spacing(1),
+  },
+  publishSection: {
+    paddingTop: theme.spacing(3),
   },
 })
 

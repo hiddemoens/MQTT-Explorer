@@ -27,13 +27,16 @@ interface Props {
 }
 
 export const MessageHistory: React.FC<Props> = props => {
-  const [, setLastUpdate] = React.useState(Date.now())
-  const updateNodeThrottled = React.useCallback(
-    throttle(() => {
-      setLastUpdate
-    }, 300),
+  const [, setLastUpdate] = React.useState(0)
+  const updateNodeThrottled = React.useMemo(
+    () =>
+      throttle(() => {
+        setLastUpdate(update => update + 1)
+      }, 300),
     []
   )
+
+  React.useEffect(() => () => updateNodeThrottled.cancel(), [updateNodeThrottled])
 
   useSubscription(props.node?.onMessage, updateNodeThrottled)
   const decodeMessage = useDecoder(props.node)
@@ -51,7 +54,7 @@ export const MessageHistory: React.FC<Props> = props => {
   }
 
   function displayMessage(index: number, eventTarget: EventTarget) {
-    const message = props.node && props.node.messageHistory.toArray().reverse()[index]
+    const message = history[index]
     if (message) {
       props.onSelect(message)
     }
@@ -62,9 +65,12 @@ export const MessageHistory: React.FC<Props> = props => {
     return null
   }
 
-  const history = node.messageHistory.toArray()
+  const history = node.messageHistory
+    .toArray()
+    .filter(message => message !== node.message)
+    .reverse()
   let previousMessage: q.Message | undefined = node.message
-  const historyElements = [...history].reverse().map((message, idx) => {
+  const historyElements = history.map((message, idx) => {
     const value = node.message ? (decodeMessage(message)?.message?.format()[0] ?? null) : null
 
     const element = {
@@ -84,6 +90,8 @@ export const MessageHistory: React.FC<Props> = props => {
           <span>
             &nbsp;
             <MessageId message={message} />
+            {` · QoS ${message.qos}`}
+            {message.retain && ' · Retained'}
           </span>
           <div style={{ float: 'right' }}>
             <Copy value={value ?? ''} />

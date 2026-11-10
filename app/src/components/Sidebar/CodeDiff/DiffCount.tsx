@@ -18,29 +18,45 @@ function changeAmount(props: Props) {
   }
 
   return (
-    <span style={{ display: 'block', textAlign: 'right' }}>
+    <div className={props.classes.summary}>
       <span>
-        Comparing with <b>{props.nameOfCompareMessage}</b> message:&nbsp;
+        Compared with <b>{props.nameOfCompareMessage}</b> message
+      </span>
+      <span className={props.classes.counts}>
         <span className={props.classes.additions}>
           + {additions} line
           {additions === 1 ? '' : 's'}
         </span>
-        ,{' '}
         <span className={props.classes.deletions}>
-          - {deletions} line
+          − {deletions} line
           {deletions === 1 ? '' : 's'}
         </span>
       </span>
-    </span>
+    </div>
   )
 }
 
 const style = (theme: Theme) => ({
+  summary: {
+    display: 'flex',
+    flexWrap: 'wrap' as const,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: theme.spacing(0.5, 1),
+    marginTop: theme.spacing(1),
+    fontSize: '0.75rem',
+    lineHeight: 1.5,
+    color: theme.palette.text.secondary,
+  },
+  counts: {
+    display: 'flex',
+    gap: theme.spacing(1),
+  },
   additions: {
-    color: 'rgb(10, 255, 10)',
+    color: theme.palette.mode === 'dark' ? theme.palette.success.light : theme.palette.success.dark,
   },
   deletions: {
-    color: 'rgb(255, 10, 10)',
+    color: theme.palette.mode === 'dark' ? theme.palette.error.light : theme.palette.error.dark,
   },
 })
 

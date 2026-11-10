@@ -1,15 +1,14 @@
 import React, { useCallback } from 'react'
-import { Box, Typography, IconButton, Chip, Tooltip, Button } from '@mui/material'
+import { Box, Typography, IconButton, Tooltip } from '@mui/material'
 import { Theme } from '@mui/material/styles'
 import { withStyles } from '@mui/styles'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import DeleteIcon from '@mui/icons-material/Delete'
 import DeleteSweepIcon from '@mui/icons-material/DeleteSweep'
-import Info from '@mui/icons-material/Info'
 import * as q from '../../../../backend/src/Model'
 import { AppState } from '../../reducers'
-import { sidebarActions, globalActions } from '../../actions'
+import { sidebarActions } from '../../actions'
 import Copy from '../helper/Copy'
 import Save from '../helper/Save'
 import DateFormatter from '../helper/DateFormatter'
@@ -23,11 +22,12 @@ import AIAssistant from './AIAssistant'
 
 interface Props {
   node?: q.TreeNode<any>
+  // Topic nodes mutate in place; revision updates connected details when messages arrive.
+  lastUpdate: number
   classes: any
   compareMessage?: q.Message
   connectionId?: string
   sidebarActions: typeof sidebarActions
-  globalActions: typeof globalActions
 }
 
 function DetailsTab(props: Props) {
@@ -72,19 +72,6 @@ function DetailsTab(props: Props) {
         <Typography variant="body2" color="textSecondary" align="center">
           Select a topic to view details
         </Typography>
-
-        {/* About Button - always show even when no topic selected */}
-        <Box className={classes.aboutSection}>
-          <Button
-            variant="outlined"
-            size="small"
-            startIcon={<Info />}
-            onClick={() => props.globalActions.toggleAboutDialogVisibility()}
-            fullWidth
-          >
-            About MQTT Explorer
-          </Button>
-        </Box>
       </Box>
     )
   }
@@ -120,21 +107,6 @@ function DetailsTab(props: Props) {
       {/* Value Section - Simplified layout */}
       {hasValue && (
         <Box className={classes.valueSection}>
-          {/* Metadata bar - Date on left, Retained/QoS on right */}
-          <Box className={classes.metadataBar}>
-            <Box className={classes.metadataLeft}>
-              <Typography variant="caption" color="textSecondary">
-                <DateFormatter date={node.message!.received} />
-              </Typography>
-            </Box>
-            <Box className={classes.metadataRight}>
-              {node.message?.retain && (
-                <Chip label="Retained" size="small" variant="outlined" color="primary" className={classes.chip} />
-              )}
-              <Chip label={`QoS ${node.message?.qos ?? 0}`} size="small" variant="outlined" className={classes.chip} />
-            </Box>
-          </Box>
-
           {/* Action toolbar */}
           <Box className={classes.actionToolbar}>
             <Typography variant="subtitle2" className={classes.valueTitle}>
@@ -149,6 +121,14 @@ function DetailsTab(props: Props) {
               {node.message?.retain && <DeleteSelectedTopicButton />}
             </Box>
           </Box>
+          <Box className={classes.messageMetadata}>
+            <Typography variant="caption" color="textSecondary">
+              <DateFormatter date={node.message!.received} />
+            </Typography>
+            <Typography variant="caption" color="textSecondary">
+              QoS {node.message?.qos ?? 0}
+            </Typography>
+          </Box>
 
           {/* Value Display */}
           <Box className={classes.valueDisplay}>
@@ -161,54 +141,11 @@ function DetailsTab(props: Props) {
           <Box className={classes.historySection}>
             <MessageHistory onSelect={handleMessageHistorySelect} selected={compareMessage} node={node} />
           </Box>
-
-          {/* Stats Section - Moved to end of value section */}
-          <Box className={classes.statsSection}>
-            <Box className={classes.statsGrid}>
-              <Box className={classes.statItem}>
-                <Typography variant="body2" color="textSecondary" className={classes.statLabel}>
-                  Messages
-                </Typography>
-                <Typography variant="h6" className={classes.statValue}>
-                  {node.messages}
-                </Typography>
-              </Box>
-              <Box className={classes.statItem}>
-                <Typography variant="body2" color="textSecondary" className={classes.statLabel}>
-                  Subtopics
-                </Typography>
-                <Typography variant="h6" className={classes.statValue}>
-                  {node.childTopicCount()}
-                </Typography>
-              </Box>
-              <Box className={classes.statItem}>
-                <Typography variant="body2" color="textSecondary" className={classes.statLabel}>
-                  Total
-                </Typography>
-                <Typography variant="h6" className={classes.statValue}>
-                  {node.leafMessageCount()}
-                </Typography>
-              </Box>
-            </Box>
-          </Box>
         </Box>
       )}
 
       {/* AI Assistant - Always available when a node is selected */}
-      {node && <AIAssistant node={node} connectionId={props.connectionId} />}
-
-      {/* About Section - always visible at bottom */}
-      <Box className={classes.aboutSection}>
-        <Button
-          variant="outlined"
-          size="small"
-          startIcon={<Info />}
-          onClick={() => props.globalActions.toggleAboutDialogVisibility()}
-          fullWidth
-        >
-          About MQTT Explorer
-        </Button>
-      </Box>
+      <AIAssistant node={node} connectionId={props.connectionId} />
     </Box>
   )
 }
@@ -217,7 +154,8 @@ const styles = (theme: Theme) => ({
   root: {
     display: 'flex',
     flexDirection: 'column' as const,
-    gap: theme.spacing(3),
+    gap: theme.spacing(1.5),
+    minWidth: 0,
     [theme.breakpoints.down('sm')]: {
       gap: theme.spacing(2),
     },
@@ -229,96 +167,43 @@ const styles = (theme: Theme) => ({
     justifyContent: 'center',
     minHeight: '200px',
     padding: theme.spacing(3),
-    gap: theme.spacing(3),
-  },
-  aboutSection: {
-    marginTop: theme.spacing(3),
-    paddingTop: theme.spacing(2),
-    borderTop: `1px solid ${theme.palette.divider}`,
-  },
-  aboutSection: {
-    marginTop: theme.spacing(3),
-    paddingTop: theme.spacing(2),
-    borderTop: `1px solid ${theme.palette.divider}`,
+    gap: theme.spacing(1.5),
   },
   // Topic section
   topicSection: {
     display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    flexDirection: 'column' as const,
+    alignItems: 'stretch',
     gap: theme.spacing(1),
     paddingBottom: theme.spacing(2),
     borderBottom: `1px solid ${theme.palette.divider}`,
   },
   topicActions: {
     display: 'flex',
-    gap: theme.spacing(0.5),
+    justifyContent: 'flex-end',
+    gap: theme.spacing(0.25),
     alignItems: 'center',
-    flexShrink: 0,
+    '& .MuiIconButton-root': {
+      width: 28,
+      height: 28,
+      padding: theme.spacing(0.5),
+      fontSize: '1rem',
+    },
   },
   iconButton: {
     padding: theme.spacing(0.5),
-  },
-  // Stats section
-  statsSection: {
-    marginTop: theme.spacing(2),
-  },
-  statsGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
-    gap: theme.spacing(1.5),
-    [theme.breakpoints.down('sm')]: {
-      gap: theme.spacing(1),
-    },
-  },
-  statItem: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    alignItems: 'center',
-    padding: theme.spacing(1.5, 1),
-    backgroundColor: theme.palette.action.hover,
-    borderRadius: theme.shape.borderRadius,
-    gap: theme.spacing(0.5),
-  },
-  statLabel: {
-    fontSize: '0.75rem',
-    fontWeight: 500,
-    textTransform: 'uppercase' as const,
-    letterSpacing: '0.5px',
-  },
-  statValue: {
-    fontSize: '1.25rem',
-    fontWeight: 600,
-    lineHeight: 1,
   },
   // Value section
   valueSection: {
     display: 'flex',
     flexDirection: 'column' as const,
-    gap: theme.spacing(2),
+    gap: theme.spacing(0.75),
   },
-  metadataBar: {
+  messageMetadata: {
     display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: theme.spacing(1),
-    flexWrap: 'wrap' as const,
-    padding: theme.spacing(1),
-    backgroundColor: theme.palette.action.hover,
-    borderRadius: theme.shape.borderRadius,
-  },
-  metadataLeft: {
-    display: 'flex',
-    gap: theme.spacing(1),
     alignItems: 'center',
     flexWrap: 'wrap' as const,
-  },
-  metadataRight: {
-    display: 'flex',
-    alignItems: 'center',
-  },
-  chip: {
-    height: '24px',
+    gap: theme.spacing(0.25, 1.5),
   },
   actionToolbar: {
     display: 'flex',
@@ -331,8 +216,6 @@ const styles = (theme: Theme) => ({
     fontWeight: 600,
     color: theme.palette.text.primary,
     fontSize: '0.875rem',
-    textTransform: 'uppercase' as const,
-    letterSpacing: '0.5px',
     flexShrink: 0,
   },
   actionButtons: {
@@ -342,11 +225,17 @@ const styles = (theme: Theme) => ({
   },
   valueActions: {
     display: 'flex',
-    gap: theme.spacing(0.5),
+    gap: theme.spacing(0.25),
     alignItems: 'center',
+    '& .MuiIconButton-root': {
+      width: 28,
+      height: 28,
+      padding: theme.spacing(0.5),
+      fontSize: '1rem',
+    },
   },
   valueDisplay: {
-    marginTop: theme.spacing(1),
+    minWidth: 0,
   },
   historySection: {
     marginTop: theme.spacing(1),
@@ -359,7 +248,6 @@ const mapStateToProps = (state: AppState) => ({
 
 const mapDispatchToProps = (dispatch: any) => ({
   sidebarActions: bindActionCreators(sidebarActions, dispatch),
-  globalActions: bindActionCreators(globalActions, dispatch),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(DetailsTab))
